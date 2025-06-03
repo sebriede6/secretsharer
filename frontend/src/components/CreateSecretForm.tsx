@@ -97,8 +97,6 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) 
     );
   }
 
-  const unused = 42; // Unbenutzte Variable für absichtlichen ESLint-Fehler
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6 p-6 bg-gray-800 rounded-lg shadow-md">
       <div>
@@ -150,6 +148,10 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) 
           {isLoading ? 'Creating...' : 'Create Secret & Get Link'}
         </button>
       </div>
+
+      // absichtlicher Syntaxfehler, der von ESLint nicht automatisch gefixt werden kann
+      const foo =
+
     </form>
   );
 };
