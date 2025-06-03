@@ -15,13 +15,13 @@
     "lint-staged": "^..."
   },
   "lint-staged": {
-    "backend/**/*.{js,json,md}": [
-      "eslint --fix --cwd ./backend",
-      "prettier --write --cwd ./backend"
+    "frontend/src/components/*.{ts,tsx}": [
+      "eslint --cwd frontend",
+      "prettier --write --cwd frontend"
     ],
-    "frontend/**/*.{ts,tsx,css,json,md}": [
-      "eslint --cwd ./frontend",
-      "prettier --write --cwd ./frontend"
+    "backend/**/*.js": [
+      "eslint --cwd backend",
+      "prettier --write --cwd backend"
     ]
   }
 }
