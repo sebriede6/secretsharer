@@ -1,8 +1,4 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo "Root: Running pre-commit hooks..."
-
-# Führe lint-staged im Root-Verzeichnis aus und verwende explizit die Root-Konfiguration
-cd "$(git rev-parse --show-toplevel)"
-npx lint-staged --config package.json
+npx lint-staged
