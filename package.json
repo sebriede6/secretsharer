@@ -1,0 +1,27 @@
+{
+  "name": "ephemeral-secret-sharer-root",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"No tests run\"",
+    "prepare": "husky"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "husky": "^...",
+    "lint-staged": "^..."
+  },
+  "lint-staged": {
+    "backend/**/*.{js,json,md}": [
+      "eslint --fix --cwd ./backend",
+      "prettier --write --cwd ./backend"
+    ],
+    "frontend/**/*.{ts,tsx,css,json,md}": [
+      "eslint --fix --cwd ./frontend",
+      "prettier --write --cwd ./frontend"
+    ]
+  }
+}
