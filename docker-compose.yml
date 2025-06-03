@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    # environment: # Diesen Block komplett entfernen oder auskommentieren
+    #   # ... alle Kommentare hier drin waren das Problem
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - postgres_db
+    networks:
+      - app-network
+    volumes:
+      - ./backend:/usr/src/app
+      - /usr/src/app/node_modules
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    networks:
+      - app-network
+
+  postgres_db:
+    image: bitnami/postgresql:latest
+    ports:
+      - "5432:5432"
+    environment: # Dieser Environment-Block ist korrekt als Mapping (Liste von Key=Value)
+      - POSTGRESQL_USERNAME=user
+      - POSTGRESQL_PASSWORD=password
+      - POSTGRESQL_DATABASE=secret_sharer_db
+    volumes:
+      - postgres_data:/bitnami/postgresql
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
