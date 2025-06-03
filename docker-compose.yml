@@ -32,7 +32,7 @@ services:
     image: bitnami/postgresql:latest
     ports:
       - "5432:5432"
-    environment: # Dieser Environment-Block ist korrekt als Mapping (Liste von Key=Value)
+    environment: 
       - POSTGRESQL_USERNAME=user
       - POSTGRESQL_PASSWORD=password
       - POSTGRESQL_DATABASE=secret_sharer_db

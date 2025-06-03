@@ -6,7 +6,6 @@ import { query, initializeDB } from './config/db.js';
 import { encrypt, decrypt } from './utils/cryptoUtils.js';
 import logger from './config/logger.js';
 
-// Lade Umgebungsvariablen so früh wie möglich
 dotenv.config();
 logger.info('server.js: Script loaded. dotenv.config() called.');
 
@@ -14,8 +13,12 @@ const PORT = process.env.PORT || 3001;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
-logger.debug(`server.js: PORT=${PORT}, NODE_ENV=${NODE_ENV}, FRONTEND_URL=${FRONTEND_URL}`);
-logger.debug(`server.js: SECRET_KEY_CRYPTO is ${process.env.SECRET_KEY_CRYPTO ? 'set' : 'NOT SET'}`);
+logger.debug(
+  `server.js: PORT=${PORT}, NODE_ENV=${NODE_ENV}, FRONTEND_URL=${FRONTEND_URL}`
+);
+logger.debug(
+  `server.js: SECRET_KEY_CRYPTO is ${process.env.SECRET_KEY_CRYPTO ? 'set' : 'NOT SET'}`
+);
 
 const app = express();
 logger.info('server.js: Express app initialized.');
@@ -25,67 +28,97 @@ logger.info(`server.js: CORS configured for origin: ${FRONTEND_URL}`);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-logger.info('server.js: express.json and express.urlencoded middleware configured.');
+logger.info(
+  'server.js: express.json and express.urlencoded middleware configured.'
+);
 
-// Health Check Route
 app.get('/health', (req, res) => {
   logger.info('server.js: GET /health called');
   res.status(200).json({ status: 'UP', timestamp: new Date().toISOString() });
 });
 logger.info('server.js: /health route configured.');
 
-// Create Secret Route
 app.post('/api/secrets', async (req, res) => {
   logger.info('server.js: POST /api/secrets called');
   const { content, expiresInMinutes } = req.body;
-  logger.debug(`server.js: POST /api/secrets payload: content present - ${!!content}, expiresInMinutes - ${expiresInMinutes}`);
+  logger.debug(
+    `server.js: POST /api/secrets payload: content present - ${!!content}, expiresInMinutes - ${expiresInMinutes}`
+  );
 
   if (!content || typeof content !== 'string' || content.trim() === '') {
-    logger.warn('server.js: POST /api/secrets - Validation failed: Content missing or invalid.');
-    return res.status(400).json({ error: 'Content is required and must be a non-empty string.' });
+    logger.warn(
+      'server.js: POST /api/secrets - Validation failed: Content missing or invalid.'
+    );
+    return res
+      .status(400)
+      .json({ error: 'Content is required and must be a non-empty string.' });
   }
   if (content.length > 10000) {
-    logger.warn('server.js: POST /api/secrets - Validation failed: Content too long.');
-    return res.status(400).json({ error: 'Content is too long (max 10000 characters).' });
+    logger.warn(
+      'server.js: POST /api/secrets - Validation failed: Content too long.'
+    );
+    return res
+      .status(400)
+      .json({ error: 'Content is too long (max 10000 characters).' });
   }
 
   let expiresAt = null;
   if (expiresInMinutes) {
     const minutes = parseInt(expiresInMinutes, 10);
     if (isNaN(minutes) || minutes <= 0) {
-      logger.warn('server.js: POST /api/secrets - Validation failed: Invalid expiresInMinutes.');
+      logger.warn(
+        'server.js: POST /api/secrets - Validation failed: Invalid expiresInMinutes.'
+      );
       return res.status(400).json({ error: 'Invalid expiresInMinutes value.' });
     }
     expiresAt = new Date(Date.now() + minutes * 60 * 1000);
-    logger.debug(`server.js: POST /api/secrets - Secret will expire at: ${expiresAt.toISOString()}`);
+    logger.debug(
+      `server.js: POST /api/secrets - Secret will expire at: ${expiresAt.toISOString()}`
+    );
   }
 
   try {
     const secretId = uuidv4();
     const { iv, encryptedData, authTag } = encrypt(content);
-    logger.debug(`server.js: POST /api/secrets - Content encrypted for ID: ${secretId}`);
+    logger.debug(
+      `server.js: POST /api/secrets - Content encrypted for ID: ${secretId}`
+    );
 
     const insertQueryText = `
       INSERT INTO secrets (id, encrypted_content, iv, auth_tag, expires_at)
       VALUES ($1, $2, $3, $4, $5)
       RETURNING id;
     `;
-    const result = await query(insertQueryText, [secretId, encryptedData, iv, authTag, expiresAt]);
-    logger.info(`server.js: POST /api/secrets - Secret created successfully with ID: ${result.rows[0].id}`);
+    const result = await query(insertQueryText, [
+      secretId,
+      encryptedData,
+      iv,
+      authTag,
+      expiresAt,
+    ]);
+    logger.info(
+      `server.js: POST /api/secrets - Secret created successfully with ID: ${result.rows[0].id}`
+    );
     res.status(201).json({ id: result.rows[0].id });
   } catch (error) {
-    logger.error(`server.js: POST /api/secrets - Error creating secret: ${error.message}`, { stack: error.stack });
+    logger.error(
+      `server.js: POST /api/secrets - Error creating secret: ${error.message}`,
+      { stack: error.stack }
+    );
     res.status(500).json({ error: 'Failed to create secret.' });
   }
 });
 logger.info('server.js: POST /api/secrets route configured.');
 
-// Get Secret Route
 app.get('/api/secrets/:id', async (req, res) => {
   const { id } = req.params;
   logger.info(`server.js: GET /api/secrets/${id} called.`);
 
-  if (!/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(id)) {
+  if (
+    !/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(
+      id
+    )
+  ) {
     logger.warn(`server.js: GET /api/secrets/${id} - Invalid ID format.`);
     return res.status(400).json({ error: 'Invalid secret ID format.' });
   }
@@ -98,37 +131,61 @@ app.get('/api/secrets/:id', async (req, res) => {
 
     if (result.rows.length === 0) {
       logger.warn(`server.js: GET /api/secrets/${id} - Secret not found.`);
-      return res.status(404).json({ error: 'Secret not found or already viewed/expired.' });
+      return res
+        .status(404)
+        .json({ error: 'Secret not found or already viewed/expired.' });
     }
 
     const secretData = result.rows[0];
 
     if (secretData.expires_at && new Date(secretData.expires_at) < new Date()) {
-      logger.info(`server.js: GET /api/secrets/${id} - Secret expired. Deleting.`);
+      logger.info(
+        `server.js: GET /api/secrets/${id} - Secret expired. Deleting.`
+      );
       await query('DELETE FROM secrets WHERE id = $1;', [id]);
-      return res.status(404).json({ error: 'Secret not found or already viewed/expired.' });
+      return res
+        .status(404)
+        .json({ error: 'Secret not found or already viewed/expired.' });
     }
 
-    const decryptedContent = decrypt(secretData.encrypted_content, secretData.iv, secretData.auth_tag);
+    const decryptedContent = decrypt(
+      secretData.encrypted_content,
+      secretData.iv,
+      secretData.auth_tag
+    );
     logger.debug(`server.js: GET /api/secrets/${id} - Content decrypted.`);
 
     if (secretData.one_time_view) {
-      logger.info(`server.js: GET /api/secrets/${id} - One-time secret. Deleting after retrieval.`);
+      logger.info(
+        `server.js: GET /api/secrets/${id} - One-time secret. Deleting after retrieval.`
+      );
       await query('DELETE FROM secrets WHERE id = $1;', [id]);
     }
 
     res.status(200).json({ content: decryptedContent });
   } catch (error) {
-    if (error.message.includes('Unsupported state or unable to authenticate data')) {
-        logger.error(`server.js: GET /api/secrets/${id} - Decryption failed (tampered/wrong key?): ${error.message}`, { stack: error.stack });
-        return res.status(500).json({ error: 'Failed to decrypt secret. It might be corrupted or tampered with.' });
+    if (
+      error.message.includes('Unsupported state or unable to authenticate data')
+    ) {
+      logger.error(
+        `server.js: GET /api/secrets/${id} - Decryption failed (tampered/wrong key?): ${error.message}`,
+        { stack: error.stack }
+      );
+      return res
+        .status(500)
+        .json({
+          error:
+            'Failed to decrypt secret. It might be corrupted or tampered with.',
+        });
     }
-    logger.error(`server.js: GET /api/secrets/${id} - Error retrieving secret: ${error.message}`, { stack: error.stack });
+    logger.error(
+      `server.js: GET /api/secrets/${id} - Error retrieving secret: ${error.message}`,
+      { stack: error.stack }
+    );
     res.status(500).json({ error: 'Failed to retrieve secret.' });
   }
 });
 logger.info('server.js: GET /api/secrets/:id route configured.');
-
 
 let serverInstance;
 
@@ -151,7 +208,10 @@ const startApp = async () => {
       });
 
       serverInstance.on('error', (error) => {
-        logger.error(`startApp: Server 'error' event. Message: ${error.message}`, { stack: error.stack });
+        logger.error(
+          `startApp: Server 'error' event. Message: ${error.message}`,
+          { stack: error.stack }
+        );
         if (error.syscall !== 'listen') {
           throw error;
         }
@@ -169,15 +229,23 @@ const startApp = async () => {
             throw error;
         }
       });
-      logger.info('startApp: Express app.listen() called. Server should be starting.');
-
+      logger.info(
+        'startApp: Express app.listen() called. Server should be starting.'
+      );
     } else {
-      logger.info('startApp: Running in test mode, server not started by app.listen().');
+      logger.info(
+        'startApp: Running in test mode, server not started by app.listen().'
+      );
     }
   } catch (error) {
-    logger.error(`startApp: CRITICAL - Failed to initialize application or start server: ${error.message}`, { stack: error.stack });
+    logger.error(
+      `startApp: CRITICAL - Failed to initialize application or start server: ${error.message}`,
+      { stack: error.stack }
+    );
     if (NODE_ENV !== 'test') {
-      logger.info('startApp: Exiting process due to critical initialization error.');
+      logger.info(
+        'startApp: Exiting process due to critical initialization error.'
+      );
       process.exit(1);
     } else {
       throw error;
@@ -191,7 +259,9 @@ const stopApp = async () => {
       logger.info('stopApp: Attempting to stop server...');
       serverInstance.close((err) => {
         if (err) {
-          logger.error(`stopApp: Error stopping server: ${err.message}`, { stack: err.stack });
+          logger.error(`stopApp: Error stopping server: ${err.message}`, {
+            stack: err.stack,
+          });
           return reject(err);
         }
         logger.info('stopApp: Server stopped successfully.');
@@ -204,71 +274,76 @@ const stopApp = async () => {
   });
 };
 
-// Überarbeitete Funktion zur Überprüfung, ob das Modul das Hauptmodul ist
 const esMain = (metaUrl) => {
-    if (!metaUrl || !metaUrl.startsWith('file:')) {
-        return false;
-    }
-    // Konvertiere file URL zu einem Pfad. Berücksichtige Windows-Pfade.
-    const modulePath = new URL(metaUrl).pathname;
-    const modulePathNormalized = process.platform === 'win32' ? modulePath.substring(1) : modulePath; // Entferne führenden / unter Windows
+  if (!metaUrl || !metaUrl.startsWith('file:')) {
+    return false;
+  }
+  const modulePath = new URL(metaUrl).pathname;
+  const modulePathNormalized =
+    process.platform === 'win32' ? modulePath.substring(1) : modulePath;
 
-    // process.argv[1] ist der Pfad zum ausgeführten Skript
-    const scriptPath = process.argv[1];
+  const scriptPath = process.argv[1];
 
-    // Normalisiere beide Pfade für einen besseren Vergleich (z.B. Kleinbuchstaben, Backslashes zu Forwardslashes)
-    const normalizePath = (p) => p.toLowerCase().replace(/\\/g, '/');
+  const normalizePath = (p) => p.toLowerCase().replace(/\\/g, '/');
 
-    const normalizedModulePath = normalizePath(modulePathNormalized);
-    const normalizedScriptPath = normalizePath(scriptPath);
+  const normalizedModulePath = normalizePath(modulePathNormalized);
+  const normalizedScriptPath = normalizePath(scriptPath);
 
-    // Debugging Logs
-    // logger.debug(`esMain check: Normalized Module Path: ${normalizedModulePath}`);
-    // logger.debug(`esMain check: Normalized Script Path: ${normalizedScriptPath}`);
-
-    // Der Vergleich kann knifflig sein wegen .js Endungen, relativen Pfaden etc.
-    // Ein einfacherer Check, der oft funktioniert, wenn Nodemon involviert ist:
-    // Prüfe, ob der Skriptpfad den Dateinamen des Moduls enthält.
-    const moduleFilename = normalizedModulePath.substring(normalizedModulePath.lastIndexOf('/') + 1);
-    if (normalizedScriptPath.endsWith(moduleFilename)) {
-        return true;
-    }
-    // Fallback auf direkten Vergleich, falls der obige nicht greift
-    return normalizedScriptPath === normalizedModulePath;
+  const moduleFilename = normalizedModulePath.substring(
+    normalizedModulePath.lastIndexOf('/') + 1
+  );
+  if (normalizedScriptPath.endsWith(moduleFilename)) {
+    return true;
+  }
+  return normalizedScriptPath === normalizedModulePath;
 };
 
 const isMainModule = esMain(import.meta.url);
 
 if (isMainModule) {
-  logger.info('server.js is being run directly as the main module, calling startApp().');
-  startApp().catch(err => {
-    logger.error(`server.js: Unhandled error during startApp() execution: ${err.message}`, {stack: err.stack});
+  logger.info(
+    'server.js is being run directly as the main module, calling startApp().'
+  );
+  startApp().catch((err) => {
+    logger.error(
+      `server.js: Unhandled error during startApp() execution: ${err.message}`,
+      { stack: err.stack }
+    );
     if (NODE_ENV !== 'test') {
-        process.exit(1);
+      process.exit(1);
     }
   });
 } else {
-  logger.info('server.js is being imported or run in a way that isMainModule is false, not calling startApp() automatically.');
+  logger.info(
+    'server.js is being imported or run in a way that isMainModule is false, not calling startApp() automatically.'
+  );
   logger.debug(`  For debugging isMainModule:`);
   logger.debug(`    import.meta.url: ${import.meta.url}`);
   if (import.meta.url && import.meta.url.startsWith('file:')) {
     const modulePath = new URL(import.meta.url).pathname;
-    const modulePathNormalized = process.platform === 'win32' ? modulePath.substring(1) : modulePath;
+    const modulePathNormalized =
+      process.platform === 'win32' ? modulePath.substring(1) : modulePath;
     logger.debug(`    Derived modulePath: ${modulePathNormalized}`);
   }
   logger.debug(`    process.argv[0] (node executable): ${process.argv[0]}`);
   logger.debug(`    process.argv[1] (script being run): ${process.argv[1]}`);
 }
 
-// Globale Fehlerbehandlung für nicht abgefangene Promises und Exceptions
 process.on('unhandledRejection', (reason, promise) => {
-  logger.error('Global: Unhandled Rejection at:', { promise, reason: reason instanceof Error ? reason.message : reason, stack: reason instanceof Error ? reason.stack : undefined });
+  logger.error('Global: Unhandled Rejection at:', {
+    promise,
+    reason: reason instanceof Error ? reason.message : reason,
+    stack: reason instanceof Error ? reason.stack : undefined,
+  });
 });
 
 process.on('uncaughtException', (error) => {
-  logger.error('Global: Uncaught Exception:', { message: error.message, stack: error.stack });
-  if (NODE_ENV !== 'test') { // Im Testmodus soll Jest den Fehler handhaben
-    process.exit(1); // In Dev/Prod beenden, da der Zustand undefiniert ist
+  logger.error('Global: Uncaught Exception:', {
+    message: error.message,
+    stack: error.stack,
+  });
+  if (NODE_ENV !== 'test') {
+    process.exit(1);
   }
 });
 

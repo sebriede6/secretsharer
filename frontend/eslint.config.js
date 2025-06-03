@@ -1,5 +1,4 @@
-// frontend/eslint.config.js
-import globals from "globals"; // Stelle sicher, dass dieser Import da ist
+import globals from "globals";
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import eslintPluginReact from 'eslint-plugin-react';
@@ -21,12 +20,11 @@ export default tseslint.config(
         ecmaFeatures: { jsx: true },
       },
       globals: {
-        ...globals.browser, // Stellt fetch, window, navigator etc. bereit
-        ...globals.es2021,  // Für moderne JavaScript Features
+        ...globals.browser,
+        ...globals.es2021,
         window: 'readonly',
         navigator: 'readonly',
         fetch: 'readonly',
-        // ggf. ...globals.node für Node.js spezifische Globals, falls nötig (hier eher nicht für Komponenten)
       }
     },
     settings: {
@@ -35,9 +33,8 @@ export default tseslint.config(
       },
     },
     rules: {
-      // ... deine Regeln ...
       'react/prop-types': 'off',
-      '@typescript-eslint/no-unused-vars': ['warn', { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }], // Auch ungenutzte Variablen ignorieren, die mit _ beginnen
+      '@typescript-eslint/no-unused-vars': ['warn', { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
@@ -45,7 +42,7 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-call': 'off',
       '@typescript-eslint/no-unsafe-return': 'off',
       '@typescript-eslint/no-unsafe-argument': 'off',
-      '@typescript-eslint/no-misused-promises': 'off', // Regel deaktiviert
+      '@typescript-eslint/no-misused-promises': 'off',
     },
   },
   eslintPluginPrettierRecommended,

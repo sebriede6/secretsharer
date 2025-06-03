@@ -4,10 +4,12 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const ALGORITHM = 'aes-256-gcm';
-const KEY = Buffer.from(process.env.SECRET_KEY_CRYPTO, 'hex'); // Muss 32 Bytes (64 Hex Zeichen) sein
+const KEY = Buffer.from(process.env.SECRET_KEY_CRYPTO, 'hex');
 
 if (KEY.length !== 32) {
-  console.error('SECRET_KEY_CRYPTO must be a 64-character hex string (32 bytes).');
+  console.error(
+    'SECRET_KEY_CRYPTO must be a 64-character hex string (32 bytes).'
+  );
   process.exit(1);
 }
 
