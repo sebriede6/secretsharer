@@ -20,7 +20,7 @@
       "prettier --write --cwd ./backend"
     ],
     "frontend/**/*.{ts,tsx,css,json,md}": [
-      "eslint --fix --cwd ./frontend",
+      "eslint --cwd ./frontend",
       "prettier --write --cwd ./frontend"
     ]
   }
