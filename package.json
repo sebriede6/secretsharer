@@ -22,6 +22,9 @@
     "backend/**/*.js": [
       "eslint --cwd backend",
       "prettier --write --cwd backend"
+    ],
+    "*.yml": [
+      "prettier --write"
     ]
   }
 }
