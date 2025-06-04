@@ -7,8 +7,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3001:3001"
-    # environment: # Diesen Block komplett entfernen oder auskommentieren
-    #   # ... alle Kommentare hier drin waren das Problem
     env_file:
       - ./backend/.env
     depends_on:
@@ -32,7 +30,7 @@ services:
     image: bitnami/postgresql:latest
     ports:
       - "5432:5432"
-    environment: 
+    environment:
       - POSTGRESQL_USERNAME=user
       - POSTGRESQL_PASSWORD=password
       - POSTGRESQL_DATABASE=secret_sharer_db

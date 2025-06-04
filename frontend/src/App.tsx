@@ -4,10 +4,7 @@ import ViewSecret from './components/ViewSecret';
 
 function App() {
   const handleSecretCreated = (secretId: string) => {
-    console.log(
-      'App.tsx: Secret created with ID (for potential navigation):',
-      secretId
-    );
+    console.log(secretId);
   };
 
   return (

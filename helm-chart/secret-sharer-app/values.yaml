@@ -1,0 +1,64 @@
+replicaCount: 1
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+backend:
+  replicaCount: 1
+  image:
+    repository: sebriede66/ephemeral-secret-backend
+    pullPolicy: IfNotPresent
+    tag: "v1.0.0"
+  service:
+    type: ClusterIP
+    port: 3001
+  envFromSecret: backend-secrets
+  frontendUrlPlaceholder: "http://temp.placeholder.com"
+  secrets: {}
+  env: {}
+  resources: {}
+
+frontend:
+  replicaCount: 1
+  image:
+    repository: sebriede66/ephemeral-secret-frontend
+    pullPolicy: IfNotPresent
+    tag: "v1.0.0"
+  service:
+    type: LoadBalancer
+    port: 80
+    targetPort: 8080
+  resources: {}
+
+postgresql:
+  enabled: true
+  auth:
+    username: "user"
+    database: "secret_sharer_db"
+    existingSecret: "postgresql-secret"
+    secretKeys:
+      userPasswordKey: "postgresql-password"
+  primary:
+    persistence:
+      enabled: true
+      size: 1Gi
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+      limits:
+        memory: "512Mi"
+        cpu: "250m"
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podSecurityContext: {}
+
+securityContext: {}
+
+ingress:
+  enabled: false
