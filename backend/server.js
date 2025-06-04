@@ -171,12 +171,10 @@ app.get('/api/secrets/:id', async (req, res) => {
         `server.js: GET /api/secrets/${id} - Decryption failed (tampered/wrong key?): ${error.message}`,
         { stack: error.stack }
       );
-      return res
-        .status(500)
-        .json({
-          error:
-            'Failed to decrypt secret. It might be corrupted or tampered with.',
-        });
+      return res.status(500).json({
+        error:
+          'Failed to decrypt secret. It might be corrupted or tampered with.',
+      });
     }
     logger.error(
       `server.js: GET /api/secrets/${id} - Error retrieving secret: ${error.message}`,
