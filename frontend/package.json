@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "cross-env ESLINT_USE_FLAT_CONFIG=false eslint . --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0",
-    "lint:fix": "cross-env ESLINT_USE_FLAT_CONFIG=false eslint . --ext .ts,.tsx --fix",
+    "lint": "eslint . --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,css,md,json}\" --config ./.prettierrc.json --ignore-path ./.prettierignore",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
