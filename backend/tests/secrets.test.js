@@ -5,8 +5,28 @@ import { query, pool as dbPool } from '../config/db.js';
 describe('Secrets API', () => {
   beforeAll(async () => {
     try {
+      // Ensure we're using test database
+      process.env.NODE_ENV = 'test';
+      process.env.DATABASE_NAME = 'secret_sharer_db_test';
+
       await startApp();
-      await query('TRUNCATE TABLE secrets RESTART IDENTITY CASCADE;', []);
+      // Create fresh table for tests with all required columns
+      await query('DROP TABLE IF EXISTS secrets;', []);
+      await query(
+        `
+        CREATE TABLE secrets (
+          id UUID PRIMARY KEY,
+          encrypted_content TEXT NOT NULL,
+          iv TEXT NOT NULL,
+          auth_tag TEXT NOT NULL,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+          expires_at TIMESTAMP WITH TIME ZONE,
+          accessed BOOLEAN DEFAULT FALSE,
+          one_time_view BOOLEAN DEFAULT TRUE
+        );
+      `,
+        []
+      );
     } catch (error) {
       console.error('Error during test setup (beforeAll):', error);
       throw error;
@@ -14,8 +34,13 @@ describe('Secrets API', () => {
   });
 
   afterAll(async () => {
-    await stopApp();
-    await dbPool.end();
+    try {
+      await query('DROP TABLE IF EXISTS secrets;', []);
+      await stopApp();
+      await dbPool.end();
+    } catch (error) {
+      console.error('Error during test cleanup (afterAll):', error);
+    }
   });
 
   let _secretId;
@@ -41,12 +66,10 @@ describe('Secrets API', () => {
   });
 
   it('GET /api/secrets/:id - should retrieve and delete the secret', async () => {
-    const creationRes = await request(app)
-      .post('/api/secrets')
-      .send({
-        content: 'A temporary secret for retrieval test',
-        expiresInMinutes: 1,
-      });
+    const creationRes = await request(app).post('/api/secrets').send({
+      content: 'A temporary secret for retrieval test',
+      expiresInMinutes: 1,
+    });
     expect(creationRes.statusCode).toEqual(201);
     const tempSecretId = creationRes.body.id;
 

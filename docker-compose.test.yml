@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  postgres_test:
+    image: bitnami/postgresql:latest
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRESQL_USERNAME=user
+      - POSTGRESQL_PASSWORD=password
+      - POSTGRESQL_DATABASE=secret_sharer_db_test
+    volumes:
+      - postgres_test_data:/bitnami/postgresql
+    networks:
+      - test-network
+
+volumes:
+  postgres_test_data:
+
+networks:
+  test-network:
+    driver: bridge
