@@ -57,7 +57,11 @@ jobs:
           SECRET_KEY_CRYPTO: ${{ secrets.TEST_SECRET_KEY_CRYPTO }}
           DATABASE_URL: "postgresql://testuser:testpassword@postgres:5432/testdb_ci"
           JWT_SECRET: ${{ secrets.TEST_JWT_SECRET }}
-        run: npm test
+        run: |
+          echo "Waiting for PostgreSQL to be ready..."
+          sleep 15
+          echo "Attempting to run backend tests..."
+          npm test
 
       - name: Frontend - Install Dependencies
         working-directory: ./frontend
