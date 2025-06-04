@@ -37,7 +37,14 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
       - name: Check DNS resolution for postgres
-        run: getent hosts postgres
+        run: |
+          for i in {1..40}; do
+            getent hosts postgres && exit 0
+            echo "Waiting for DNS for postgres... ($i)"
+            sleep 3
+          done
+          echo "DNS for postgres not available after waiting. Exiting."
+          exit 1
 
       - name: Set up Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
