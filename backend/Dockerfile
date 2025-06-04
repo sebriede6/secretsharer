@@ -1,15 +1,17 @@
-# Stage 1: Build
+
 FROM node:23.5.0-alpine AS builder
 WORKDIR /usr/src/app
 COPY package*.json ./
-RUN npm ci --omit=dev
+
+RUN npm ci --omit=dev --ignore-scripts
 COPY . .
 
-# Stage 2: Production
+
 FROM node:23.5.0-alpine AS production
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 WORKDIR /usr/src/app
+
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app .
 EXPOSE 3001
