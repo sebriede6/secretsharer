@@ -25,6 +25,9 @@
     ],
     "*.yml": [
       "prettier --write"
+    ],
+    "*.yaml": [
+      "prettier --write"
     ]
   }
 }
