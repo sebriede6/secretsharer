@@ -59,7 +59,10 @@ jobs:
           JWT_SECRET: ${{ secrets.TEST_JWT_SECRET }}
         run: |
           echo "Waiting for PostgreSQL to be ready..."
-          sleep 15
+          for i in {1..20}; do
+            pg_isready -h postgres -U testuser -d testdb_ci && break
+            sleep 2
+          done
           echo "Attempting to run backend tests..."
           npm test
 
