@@ -17,72 +17,14 @@ spec:
         {{- include "secret-sharer-app.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: frontend
     spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       serviceAccountName: {{ include "secret-sharer-app.serviceAccountName" . }}
-      securityContext:
-        {{- include "secret-sharer-app.podSecurityContext" . | nindent 8 }}
-      volumes:
-        - name: nginx-cache
-          emptyDir: {}
-        - name: nginx-temp-client-body
-          emptyDir: {}
-        - name: nginx-temp-proxy
-          emptyDir: {}
-        - name: nginx-temp-fastcgi
-          emptyDir: {}
-        - name: nginx-temp-uwsgi
-          emptyDir: {}
-        - name: nginx-temp-scgi
-          emptyDir: {}
-        - name: nginx-run
-          emptyDir: {}
       containers:
-        - name: frontend
-          securityContext:
-            runAsUser: 101
-            runAsGroup: 101
-            fsGroup: 101
-            runAsNonRoot: true
-            readOnlyRootFilesystem: true
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - "ALL"
+        - name: {{ .Chart.Name }}-frontend
           image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.frontend.image.pullPolicy | default "Always" }}
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: 8080
+              containerPort: {{ .Values.frontend.service.port }}
               protocol: TCP
-          volumeMounts:
-            - name: nginx-cache
-              mountPath: /var/cache/nginx
-            - name: nginx-temp-client-body
-              mountPath: /var/tmp/nginx/client_temp
-            - name: nginx-temp-proxy
-              mountPath: /var/tmp/nginx/proxy_temp
-            - name: nginx-temp-fastcgi
-              mountPath: /var/tmp/nginx/fastcgi_temp
-            - name: nginx-temp-uwsgi
-              mountPath: /var/tmp/nginx/uwsgi_temp
-            - name: nginx-temp-scgi
-              mountPath: /var/tmp/nginx/scgi_temp
-            - name: nginx-run
-              mountPath: /run
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-            initialDelaySeconds: 15
-            periodSeconds: 20
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
-            initialDelaySeconds: 5
-            periodSeconds: 10
           resources:
-            {{- .Values.frontend.resources | default .Values.resources | toYaml | nindent 12 }}
+            {{- toYaml .Values.frontend.resources | nindent 12 }}

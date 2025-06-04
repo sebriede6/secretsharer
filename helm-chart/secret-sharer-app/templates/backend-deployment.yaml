@@ -17,17 +17,9 @@ spec:
         {{- include "secret-sharer-app.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: backend
     spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       serviceAccountName: {{ include "secret-sharer-app.serviceAccountName" . }}
-      securityContext:
-        {{- include "secret-sharer-app.podSecurityContext" . | nindent 8 }}
       containers:
-        - name: backend
-          securityContext:
-            {{- include "secret-sharer-app.securityContext" . | nindent 12 }}
+        - name: {{ .Chart.Name }}-backend
           image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
           ports:
@@ -35,37 +27,13 @@ spec:
               containerPort: {{ .Values.backend.service.port }}
               protocol: TCP
           env:
-            - name: NODE_ENV
-              value: "production"
-            - name: DATABASE_HOST
-              value: "{{ .Release.Name }}-postgresql"
-            - name: DATABASE_NAME
-              value: {{ .Values.postgresql.auth.database | quote }}
-            - name: DATABASE_USER
-              value: {{ .Values.postgresql.auth.username | quote }}
-            - name: DATABASE_PORT
-              value: "5432"
-            - name: DATABASE_PASSWORD
+            - name: POSTGRESQL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.postgresql.auth.existingSecret }}
-                  key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey }}
-            - name: FRONTEND_URL
-              value: {{ .Values.backend.frontendUrlPlaceholder | default "http://temp.placeholder.com" | quote }}
+                  name: {{ include "secret-sharer-app.fullname" . }}-postgresql
+                  key: postgres-password
           envFrom:
             - secretRef:
-                name: {{ .Values.backend.envFromSecret }}
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: http
-            initialDelaySeconds: 30
-            periodSeconds: 20
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: http
-            initialDelaySeconds: 10
-            periodSeconds: 10
+                name: {{ include "secret-sharer-app.fullname" . }}-backend-secrets
           resources:
-            {{- .Values.backend.resources | default .Values.resources | toYaml | nindent 12 }}
+            {{- toYaml .Values.backend.resources | nindent 12 }}
