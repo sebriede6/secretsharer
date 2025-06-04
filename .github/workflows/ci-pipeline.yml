@@ -38,6 +38,7 @@ jobs:
 
       - name: Check DNS resolution for postgres
         run: |
+          sleep 10
           for i in {1..40}; do
             getent hosts postgres && exit 0
             echo "Waiting for DNS for postgres... ($i)"
