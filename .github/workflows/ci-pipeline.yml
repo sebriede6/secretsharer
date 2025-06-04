@@ -2,62 +2,75 @@ name: Ephemeral Secret Sharer CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: testdb_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     strategy:
       matrix:
         node-version: [20.x]
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-        cache-dependency-path: | # Spezifiziere Pfade für den Cache-Schlüssel
-          ./backend/package-lock.json
-          ./frontend/package-lock.json
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: |
+            ./backend/package-lock.json
+            ./frontend/package-lock.json
 
-    # Backend Steps
-    - name: Backend - Install Dependencies
-      working-directory: ./backend
-      run: npm ci
+      - name: Backend - Install Dependencies
+        working-directory: ./backend
+        run: npm ci
 
-    - name: Backend - Lint Code
-      working-directory: ./backend
-      run: npm run lint
+      - name: Backend - Lint Code
+        working-directory: ./backend
+        run: npm run lint
 
-    - name: Backend - Run Tests
-      working-directory: ./backend
-      env:
-        NODE_ENV: test
-        SECRET_KEY_CRYPTO: ${{ secrets.TEST_SECRET_KEY_CRYPTO }} # Dein GitHub Secret
-        DATABASE_URL: "postgresql://testuser:testpass@localhost:5432/testdb_ci" # Vorerst Dummy, später Service-Container
-        JWT_SECRET: ${{ secrets.TEST_JWT_SECRET }} # Optional, falls benötigt
-      run: npm test
+      - name: Backend - Run Tests
+        working-directory: ./backend
+        env:
+          NODE_ENV: test
+          SECRET_KEY_CRYPTO: ${{ secrets.TEST_SECRET_KEY_CRYPTO }}
+          DATABASE_URL: "postgresql://testuser:testpassword@postgres:5432/testdb_ci"
+          JWT_SECRET: ${{ secrets.TEST_JWT_SECRET }}
+        run: npm test
 
-    # Frontend Steps
-    - name: Frontend - Install Dependencies
-      working-directory: ./frontend
-      run: npm ci
+      - name: Frontend - Install Dependencies
+        working-directory: ./frontend
+        run: npm ci
 
-    - name: Frontend - Lint Code
-      working-directory: ./frontend
-      run: npm run lint # Stelle sicher, dass dieses Skript korrekt für Flat Config oder Legacy Config ist
+      - name: Frontend - Lint Code
+        working-directory: ./frontend
+        run: npm run lint
 
-    - name: Frontend - Type Check
-      working-directory: ./frontend
-      run: npm run typecheck
+      - name: Frontend - Type Check
+        working-directory: ./frontend
+        run: npm run typecheck
 
-    - name: Frontend - Build
-      working-directory: ./frontend
-      run: npm run build
+      - name: Frontend - Build
+        working-directory: ./frontend
+        run: npm run build
