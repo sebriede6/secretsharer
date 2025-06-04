@@ -95,3 +95,10 @@ jobs:
       - name: Frontend - Build
         working-directory: ./frontend
         run: npm run build
+
+      - name: List running containers
+        run: docker ps -a
+
+      - name: Show Postgres logs
+        run: |
+          docker logs $(docker ps -aqf "ancestor=postgres:15-alpine") || echo "No logs found."
