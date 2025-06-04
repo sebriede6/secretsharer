@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [22.x] 
+        node-version: [20.x]
 
     steps:
     - name: Checkout repository
@@ -22,34 +22,42 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm' 
+        cache: 'npm'
+        cache-dependency-path: | # Spezifiziere Pfade für den Cache-Schlüssel
+          ./backend/package-lock.json
+          ./frontend/package-lock.json
 
-    
+    # Backend Steps
     - name: Backend - Install Dependencies
       working-directory: ./backend
       run: npm ci
 
     - name: Backend - Lint Code
       working-directory: ./backend
-      run: npm run lint 
+      run: npm run lint
 
     - name: Backend - Run Tests
       working-directory: ./backend
-      run: npm test 
+      env:
+        NODE_ENV: test
+        SECRET_KEY_CRYPTO: ${{ secrets.TEST_SECRET_KEY_CRYPTO }} # Dein GitHub Secret
+        DATABASE_URL: "postgresql://testuser:testpass@localhost:5432/testdb_ci" # Vorerst Dummy, später Service-Container
+        JWT_SECRET: ${{ secrets.TEST_JWT_SECRET }} # Optional, falls benötigt
+      run: npm test
 
-    
+    # Frontend Steps
     - name: Frontend - Install Dependencies
       working-directory: ./frontend
       run: npm ci
 
     - name: Frontend - Lint Code
       working-directory: ./frontend
-      run: npm run lint 
+      run: npm run lint # Stelle sicher, dass dieses Skript korrekt für Flat Config oder Legacy Config ist
 
     - name: Frontend - Type Check
       working-directory: ./frontend
-      run: npm run typecheck 
+      run: npm run typecheck
 
     - name: Frontend - Build
       working-directory: ./frontend
-      run: npm run build 
+      run: npm run build
