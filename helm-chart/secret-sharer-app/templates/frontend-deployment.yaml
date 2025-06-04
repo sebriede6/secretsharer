@@ -1,30 +1,30 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-    name: {{ include "secret-sharer-app.fullname" . }}-frontend
-    labels:
-        {{- include "secret-sharer-app.labels" . | nindent 8 }}
-        app.kubernetes.io/component: frontend
+  name: {{ include "secret-sharer-app.fullname" . }}-frontend
+  labels:
+    {{- include "secret-sharer-app.labels" . | nindent 4 }}
+    app.kubernetes.io/component: frontend
 spec:
-    replicas: {{ .Values.frontend.replicaCount | default .Values.replicaCount }}
-    selector:
-        matchLabels:
-            {{- include "secret-sharer-app.selectorLabels" . | nindent 12 }}
-            app.kubernetes.io/component: frontend
-    template:
-        metadata:
-            labels:
-                {{- include "secret-sharer-app.selectorLabels" . | nindent 16 }}
-                app.kubernetes.io/component: frontend
-        spec:
-            serviceAccountName: {{ include "secret-sharer-app.serviceAccountName" . }}
-            containers:
-                - name: {{ .Chart.Name }}-frontend
-                  image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag | default .Chart.AppVersion }}"
-                  imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
-                  ports:
-                    - name: http
-                      containerPort: {{ .Values.frontend.service.port }}
-                      protocol: TCP
-                  resources:
-                    {{- toYaml .Values.frontend.resources | nindent 20 }}
+  replicas: {{ .Values.frontend.replicaCount | default .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "secret-sharer-app.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: frontend
+  template:
+    metadata:
+      labels:
+        {{- include "secret-sharer-app.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: frontend
+    spec:
+      serviceAccountName: {{ include "secret-sharer-app.serviceAccountName" . }}
+      containers:
+        - name: {{ .Chart.Name }}-frontend
+          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.frontend.service.port }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.frontend.resources | nindent 12 }}

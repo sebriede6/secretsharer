@@ -1,39 +1,39 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-    name: {{ include "secret-sharer-app.fullname" . }}-backend
-    labels:
-        {{- include "secret-sharer-app.labels" . | nindent 8 }}
-        app.kubernetes.io/component: backend
+  name: {{ include "secret-sharer-app.fullname" . }}-backend
+  labels:
+    {{- include "secret-sharer-app.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
 spec:
-    replicas: {{ .Values.backend.replicaCount | default .Values.replicaCount }}
-    selector:
-        matchLabels:
-            {{- include "secret-sharer-app.selectorLabels" . | nindent 12 }}
-            app.kubernetes.io/component: backend
-    template:
-        metadata:
-            labels:
-                {{- include "secret-sharer-app.selectorLabels" . | nindent 16 }}
-                app.kubernetes.io/component: backend
-        spec:
-            serviceAccountName: {{ include "secret-sharer-app.serviceAccountName" . }}
-            containers:
-                - name: {{ .Chart.Name }}-backend
-                  image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
-                  imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
-                  ports:
-                    - name: http
-                      containerPort: {{ .Values.backend.service.port }}
-                      protocol: TCP
-                  env:
-                    - name: POSTGRESQL_PASSWORD
-                      valueFrom:
-                        secretKeyRef:
-                            name: {{ include "secret-sharer-app.fullname" . }}-postgresql
-                            key: postgres-password
-                  envFrom:
-                    - secretRef:
-                        name: {{ include "secret-sharer-app.fullname" . }}-backend-secrets
-                  resources:
-                    {{- toYaml .Values.backend.resources | nindent 20 }}
+  replicas: {{ .Values.backend.replicaCount | default .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "secret-sharer-app.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: backend
+  template:
+    metadata:
+      labels:
+        {{- include "secret-sharer-app.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: backend
+    spec:
+      serviceAccountName: {{ include "secret-sharer-app.serviceAccountName" . }}
+      containers:
+        - name: {{ .Chart.Name }}-backend
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.backend.service.port }}
+              protocol: TCP
+          env:
+            - name: POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "secret-sharer-app.fullname" . }}-postgresql
+                  key: postgres-password
+          envFrom:
+            - secretRef:
+                name: {{ include "secret-sharer-app.fullname" . }}-backend-secrets
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
