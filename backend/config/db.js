@@ -15,8 +15,8 @@ const dbConfig = {
   host: process.env.DATABASE_HOST || 'localhost',
   database:
     process.env.NODE_ENV === 'test'
-      ? 'secret_sharer_db_test'
-      : process.env.DATABASE_NAME,
+      ? process.env.DATABASE_NAME || 'testdb_ci'
+      : process.env.DATABASE_NAME || 'secret_sharer_db',
   password: process.env.DATABASE_PASSWORD || 'password',
   port: parseInt(process.env.DATABASE_PORT || '5432', 10),
   ssl: false,
