@@ -50,11 +50,16 @@ jobs:
       - name: Backend - Setup test environment
         working-directory: ./backend
         run: |
-          cp .env.test-ci .env.test
-          echo "Setting up test environment..."
+          echo "Creating test environment file..."
+          echo "NODE_ENV=test" > .env.test
+          echo "PORT=3001" >> .env.test
           echo "DATABASE_USER=testuser" >> .env.test
           echo "DATABASE_PASSWORD=testpassword" >> .env.test
+          echo "DATABASE_HOST=localhost" >> .env.test
           echo "DATABASE_NAME=testdb_ci" >> .env.test
+          echo "DATABASE_PORT=5432" >> .env.test
+          echo "SECRET_KEY_CRYPTO=${{ secrets.TEST_SECRET_KEY_CRYPTO }}" >> .env.test
+          echo "JWT_SECRET=${{ secrets.TEST_JWT_SECRET }}" >> .env.test
 
       - name: Backend - Lint Code
         working-directory: ./backend
