@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  build-and-test-and-push: # Job-Name ggf. angepasst
+  build-and-test-and-push:
     runs-on: ubuntu-latest
 
     services:
@@ -116,8 +116,8 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME
-            }}/ephemeral-secret-backend:latest # Ersetze mit deinem Docker Hub Usernamen
+          tags:
+            ${{ secrets.DOCKERHUB_USERNAME }}/ephemeral-secret-backend:latest
 
       - name: Build and push Frontend Docker image
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -126,5 +126,5 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME
-            }}/ephemeral-secret-frontend:latest # Ersetze mit deinem Docker Hub Usernamen
+          tags:
+            ${{ secrets.DOCKERHUB_USERNAME }}/ephemeral-secret-frontend:latest
