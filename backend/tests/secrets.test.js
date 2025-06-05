@@ -5,14 +5,9 @@ import { query, pool as dbPool } from '../config/db.js';
 describe('Secrets API', () => {
   beforeAll(async () => {
     try {
-      // Ensure we're using test database and correct credentials
+      // Ensure we're using test database
       process.env.NODE_ENV = 'test';
-      // Use CI environment variables if running in CI, otherwise use local test env
-      if (process.env.CI) {
-        process.env.DATABASE_USER = 'testuser';
-        process.env.DATABASE_PASSWORD = 'testpassword';
-        process.env.DATABASE_NAME = 'testdb_ci';
-      }
+      process.env.DATABASE_NAME = 'testdb_ci';
 
       await startApp();
       // Create fresh table for tests with all required columns
