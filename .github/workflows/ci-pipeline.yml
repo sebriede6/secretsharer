@@ -21,9 +21,7 @@ jobs:
           - 5432:5432
         options: >-
           --health-cmd "pg_isready -U testuser -d testdb_ci -h localhost"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
+          --health-interval 5s --health-timeout 5s --health-retries 10
 
     strategy:
       matrix:
@@ -40,7 +38,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "npm"
+          cache: 'npm'
           cache-dependency-path: |
             ./backend/package-lock.json
             ./frontend/package-lock.json
@@ -48,6 +46,15 @@ jobs:
       - name: Backend - Install Dependencies
         working-directory: ./backend
         run: npm ci
+
+      - name: Backend - Setup test environment
+        working-directory: ./backend
+        run: |
+          cp .env.test-ci .env.test
+          echo "Setting up test environment..."
+          echo "DATABASE_USER=testuser" >> .env.test
+          echo "DATABASE_PASSWORD=testpassword" >> .env.test
+          echo "DATABASE_NAME=testdb_ci" >> .env.test
 
       - name: Backend - Lint Code
         working-directory: ./backend
@@ -58,7 +65,7 @@ jobs:
         env:
           NODE_ENV: test
           SECRET_KEY_CRYPTO: ${{ secrets.TEST_SECRET_KEY_CRYPTO }}
-          DATABASE_URL: "postgresql://testuser:testpassword@localhost:5432/testdb_ci"
+          DATABASE_URL: 'postgresql://testuser:testpassword@localhost:5432/testdb_ci'
           JWT_SECRET: ${{ secrets.TEST_JWT_SECRET }}
         run: |
           echo "Waiting for PostgreSQL service on localhost to be ready..."
@@ -109,7 +116,8 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/ephemeral-secret-backend:latest # Ersetze mit deinem Docker Hub Usernamen
+          tags: ${{ secrets.DOCKERHUB_USERNAME
+            }}/ephemeral-secret-backend:latest # Ersetze mit deinem Docker Hub Usernamen
 
       - name: Build and push Frontend Docker image
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -118,4 +126,5 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/ephemeral-secret-frontend:latest # Ersetze mit deinem Docker Hub Usernamen
+          tags: ${{ secrets.DOCKERHUB_USERNAME
+            }}/ephemeral-secret-frontend:latest # Ersetze mit deinem Docker Hub Usernamen
