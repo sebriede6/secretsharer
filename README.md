@@ -27,46 +27,46 @@ Ephemeral Secret Sharer ist eine Webanwendung zum sicheren Teilen von einmalig a
 *   **Code-Qualität:** Husky, lint-staged
 
 ## Ordnerstruktur
----
+
 ephemeral-secret-sharer/
 ├── .github/
 │ └── workflows/
-│ └── ci-pipeline.yml # GitHub Actions CI Workflow
-├── backend/ # Node.js/Express Backend
+│ └── ci-pipeline.yml
+├── backend/
 │ ├── config/
-│ │ ├── db.js # Datenbankverbindung und Initialisierung
-│ │ └── logger.js # Winston Logger Konfiguration
-│ ├── routes/ # (Optional, falls Routen ausgelagert werden)
+│ │ ├── db.js
+│ │ └── logger.js
+│ ├── routes/
 │ ├── utils/
-│ │ └── cryptoUtils.js # Ver- und Entschlüsselungslogik
-│ ├── .env.example # Beispiel Umgebungsvariablen
-│ ├── .eslintrc.json # ESLint Konfiguration
-│ ├── .prettierrc.json # Prettier Konfiguration
-│ ├── Dockerfile # Dockerfile für das Backend
+│ │ └── cryptoUtils.js
+│ ├── .env.example
+│ ├── .eslintrc.json
+│ ├── .prettierrc.json
+│ ├── Dockerfile
 │ ├── package.json
 │ ├── package-lock.json
-│ └── server.js # Haupt-Serverdatei
-├── frontend/ # React/Vite Frontend
+│ └── server.js
+├── frontend/
 │ ├── public/
 │ ├── src/
 │ │ ├── components/
 │ │ │ ├── CreateSecretForm.tsx
 │ │ │ └── ViewSecret.tsx
-│ │ ├── App.tsx # Haupt-App-Komponente mit Routing
-│ │ ├── index.css # Globale Styles (Tailwind-Importe)
-│ │ └── main.tsx # Haupteinstiegspunkt (React DOM Render)
-│ ├── .env.example # Beispiel Umgebungsvariablen für Vite
-│ ├── eslint.config.js # ESLint Flat Config
+│ │ ├── App.tsx
+│ │ ├── index.css
+│ │ └── main.tsx
+│ ├── .env.example
+│ ├── eslint.config.js
 │ ├── .prettierrc.json
 │ ├── .prettierignore
-│ ├── Dockerfile # Dockerfile für das Frontend
-│ ├── nginx.conf # Nginx Konfiguration für den Frontend Container
+│ ├── Dockerfile
+│ ├── nginx.conf
 │ ├── package.json
 │ ├── package-lock.json
 │ ├── tsconfig.json
 │ └── vite.config.ts
 ├── helm-chart/
-│ └── secret-sharer-app/ # Helm Chart für die Anwendung
+│ └── secret-sharer-app/
 │ ├── Chart.yaml
 │ ├── values.yaml
 │ ├── templates/
@@ -75,14 +75,15 @@ ephemeral-secret-sharer/
 │ │ ├── frontend-deployment.yaml
 │ │ ├── frontend-service.yaml
 │ │ ├── _helpers.tpl
-│ │ └── ... (weitere Helm Templates)
-│ └── charts/ # Für Subcharts (z.B. PostgreSQL)
+│ │ └── ...
+│ └── charts/
 ├── .gitignore
-├── docker-compose.yml # Docker Compose für lokale Entwicklung
-├── package.json # Haupt-package.json für Husky/lint-staged Root-Konfig
+├── docker-compose.yml
+├── package.json
 ├── package-lock.json
-└── README.md # Diese Datei
----
+└── README.md
+
+
 ## Lokales Setup mit Docker Compose
 
 Stelle sicher, dass Docker und Docker Compose installiert sind.
