@@ -27,7 +27,7 @@ Ephemeral Secret Sharer ist eine Webanwendung zum sicheren Teilen von einmalig a
 *   **Code-Qualität:** Husky, lint-staged
 
 ## Ordnerstruktur
-
+---
 ephemeral-secret-sharer/
 ├── .github/
 │ └── workflows/
@@ -82,6 +82,7 @@ ephemeral-secret-sharer/
 ├── package.json # Haupt-package.json für Husky/lint-staged Root-Konfig
 ├── package-lock.json
 └── README.md # Diese Datei
+---
 ## Lokales Setup mit Docker Compose
 
 Stelle sicher, dass Docker und Docker Compose installiert sind.
