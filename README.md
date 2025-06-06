@@ -28,61 +28,62 @@ Ephemeral Secret Sharer ist eine Webanwendung zum sicheren Teilen von einmalig a
 
 ## Ordnerstruktur
 
+```
 ephemeral-secret-sharer/
 ├── .github/
-│ └── workflows/
-│ └── ci-pipeline.yml
+│   └── workflows/
+│       └── ci-pipeline.yml
 ├── backend/
-│ ├── config/
-│ │ ├── db.js
-│ │ └── logger.js
-│ ├── routes/
-│ ├── utils/
-│ │ └── cryptoUtils.js
-│ ├── .env.example
-│ ├── .eslintrc.json
-│ ├── .prettierrc.json
-│ ├── Dockerfile
-│ ├── package.json
-│ ├── package-lock.json
-│ └── server.js
+│   ├── config/
+│   │   ├── db.js
+│   │   └── logger.js
+│   ├── routes/
+│   ├── utils/
+│   │   └── cryptoUtils.js
+│   ├── .env.example
+│   ├── .eslintrc.json
+│   ├── .prettierrc.json
+│   ├── Dockerfile
+│   ├── package.json
+│   ├── package-lock.json
+│   └── server.js
 ├── frontend/
-│ ├── public/
-│ ├── src/
-│ │ ├── components/
-│ │ │ ├── CreateSecretForm.tsx
-│ │ │ └── ViewSecret.tsx
-│ │ ├── App.tsx
-│ │ ├── index.css
-│ │ └── main.tsx
-│ ├── .env.example
-│ ├── eslint.config.js
-│ ├── .prettierrc.json
-│ ├── .prettierignore
-│ ├── Dockerfile
-│ ├── nginx.conf
-│ ├── package.json
-│ ├── package-lock.json
-│ ├── tsconfig.json
-│ └── vite.config.ts
+│   ├── public/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── CreateSecretForm.tsx
+│   │   │   └── ViewSecret.tsx
+│   │   ├── App.tsx
+│   │   ├── index.css
+│   │   └── main.tsx
+│   ├── .env.example
+│   ├── eslint.config.js
+│   ├── .prettierrc.json
+│   ├── .prettierignore
+│   ├── Dockerfile
+│   ├── nginx.conf
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── tsconfig.json
+│   └── vite.config.ts
 ├── helm-chart/
-│ └── secret-sharer-app/
-│ ├── Chart.yaml
-│ ├── values.yaml
-│ ├── templates/
-│ │ ├── backend-deployment.yaml
-│ │ ├── backend-service.yaml
-│ │ ├── frontend-deployment.yaml
-│ │ ├── frontend-service.yaml
-│ │ ├── _helpers.tpl
-│ │ └── ...
-│ └── charts/
+│   └── secret-sharer-app/
+│       ├── Chart.yaml
+│       ├── values.yaml
+│       ├── templates/
+│       │   ├── backend-deployment.yaml
+│       │   ├── backend-service.yaml
+│       │   ├── frontend-deployment.yaml
+│       │   ├── frontend-service.yaml
+│       │   ├── _helpers.tpl
+│       │   └── ...
+│       └── charts/
 ├── .gitignore
 ├── docker-compose.yml
 ├── package.json
 ├── package-lock.json
 └── README.md
-
+```
 
 ## Lokales Setup mit Docker Compose
 
