@@ -75,8 +75,10 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) 
     }
   };
 
-  function handleFormSubmit(event: React.FormEvent<HTMLFormElement>) {
+  function handleFormSubmit(event: React.FormEvent<HTMLFormElement>): void {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     void handleSubmit(event);
+    return;
   }
 
   if (createdSecretId) {
