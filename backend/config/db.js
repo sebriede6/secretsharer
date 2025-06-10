@@ -2,13 +2,11 @@ import pg from 'pg';
 import dotenv from 'dotenv';
 import logger from './logger.js';
 
-
 dotenv.config({
   path: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
 });
 
 const { Pool } = pg;
-
 
 const dbConfig = {
   user: process.env.DATABASE_USER || 'user',
@@ -140,6 +138,5 @@ if (pool && process.env.NODE_ENV !== 'test') {
       );
     });
 }
-
 
 export { query, initializeDB, pool };

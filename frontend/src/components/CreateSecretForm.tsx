@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { QRCodeSVG } from 'qrcode.react'; 
+import { QRCodeSVG } from 'qrcode.react';
 
 interface CreateSecretFormProps {
   onSecretCreated: (secretId: string) => void;
 }
 
-const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) => {
+const CreateSecretForm: React.FC<CreateSecretFormProps> = ({
+  onSecretCreated,
+}) => {
   const [content, setContent] = useState<string>('');
   const [expiresInMinutes, setExpiresInMinutes] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -39,7 +41,9 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) 
 
       if (expiresInMinutes) {
         if (isNaN(parsedMinutes) || parsedMinutes <= 0) {
-          setError('If provided, "Expires in Minutes" must be a positive number.');
+          setError(
+            'If provided, "Expires in Minutes" must be a positive number.'
+          );
           setIsLoading(false);
           return;
         }
@@ -56,7 +60,9 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) 
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || `Failed to create secret: ${response.statusText}`);
+        throw new Error(
+          errorData.error || `Failed to create secret: ${response.statusText}`
+        );
       }
 
       const result = await response.json();
@@ -81,13 +87,21 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) 
 
   if (createdSecretId) {
     if (typeof apiBaseUrlFromEnv !== 'string' || !apiBaseUrlFromEnv) {
-        return <div className="p-3 bg-red-700 text-red-100 rounded-md"><p>Configuration error.</p></div>;
+      return (
+        <div className="p-3 bg-red-700 text-red-100 rounded-md">
+          <p>Configuration error.</p>
+        </div>
+      );
     }
     const secretUrl = `${window.location.origin}/secret/${createdSecretId}`;
     return (
       <div className="p-6 bg-gray-800 rounded-lg shadow-md text-center">
-        <h2 className="text-2xl font-semibold text-green-400 mb-4">Secret Created!</h2>
-        <p className="mb-2 text-gray-300">Share this link (it will only work once):</p>
+        <h2 className="text-2xl font-semibold text-green-400 mb-4">
+          Secret Created!
+        </h2>
+        <p className="mb-2 text-gray-300">
+          Share this link (it will only work once):
+        </p>
         <input
           type="text"
           value={secretUrl}
@@ -95,13 +109,15 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) 
           className="w-full p-2 border border-gray-600 rounded bg-gray-700 text-white mb-4 focus:ring-indigo-500 focus:border-indigo-500"
           onFocus={(e) => e.target.select()}
         />
-        <div className="my-4 flex justify-center"> {/* Container für den QR Code */}
+        <div className="my-4 flex justify-center">
+          {' '}
+          {/* Container für den QR Code */}
           <QRCodeSVG
             value={secretUrl}
-            size={128} 
-            bgColor={"#ffffff"} 
-            fgColor={"#000000"} 
-            level={"L"} 
+            size={128}
+            bgColor={'#ffffff'}
+            fgColor={'#000000'}
+            level={'L'}
             includeMargin={false}
           />
         </div>
@@ -122,13 +138,15 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) 
   }
 
   return (
-    
     <form
       onSubmit={handleFormSubmit}
       className="space-y-6 p-6 bg-gray-800 rounded-lg shadow-md"
     >
       <div>
-        <label htmlFor="secretContent" className="block text-sm font-medium text-gray-300 mb-1">
+        <label
+          htmlFor="secretContent"
+          className="block text-sm font-medium text-gray-300 mb-1"
+        >
           Your Secret Content
         </label>
         <textarea
@@ -144,7 +162,10 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) 
         />
       </div>
       <div>
-        <label htmlFor="expiresInMinutes" className="block text-sm font-medium text-gray-300 mb-1">
+        <label
+          htmlFor="expiresInMinutes"
+          className="block text-sm font-medium text-gray-300 mb-1"
+        >
           Expires in (minutes, optional)
         </label>
         <input

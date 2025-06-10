@@ -4,30 +4,31 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"No tests run\"",
-    "prepare": "husky"
+    "test": "echo \"No tests specified in root\"",
+    "prepare": "husky",
+    "format:frontend": "npm run format --prefix frontend",
+    "format:backend": "npm run format --prefix backend",
+    "format": "npm run format:frontend && npm run format:backend"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "husky": "^7.0.0",
-    "lint-staged": "^12.0.0",
-    "prettier": "^3.5.3"
+    "cross-env": "^7.0.3",
+    "husky": "^9.1.4",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3"
   },
   "lint-staged": {
     "frontend/**/*.{ts,tsx}": [
-      "eslint --cwd frontend",
-      "prettier --write --cwd frontend"
+      "npx eslint --fix --cwd ./frontend",
+      "prettier --write --cwd ./frontend"
     ],
     "backend/**/*.js": [
-      "eslint --cwd backend",
-      "prettier --write --cwd backend"
+      "cross-env ESLINT_USE_FLAT_CONFIG=false npx eslint --fix --cwd ./backend",
+      "prettier --write --cwd ./backend"
     ],
-    "*.yml": [
-      "prettier --write"
-    ],
-    "*.yaml": [
+    "*.{json,md,yml,yaml}": [ 
       "prettier --write"
     ]
   }
