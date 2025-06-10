@@ -64,7 +64,7 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) 
       onSecretCreated(result.id);
       setContent('');
       setExpiresInMinutes('');
-    } catch (err: unknown) {
+    } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
       } else if (typeof err === 'string') {
