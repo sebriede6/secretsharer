@@ -76,7 +76,9 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) 
   };
 
   function handleFormSubmit(event: React.FormEvent<HTMLFormElement>) {
-    void handleSubmit(event);
+    handleSubmit(event).catch((err) => {
+      console.error(err);
+    });
   }
 
   if (createdSecretId) {
@@ -124,57 +126,12 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) 
   return (
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     <form
-      onSubmit={handleFormSubmit}
-      className="space-y-6 p-6 bg-gray-800 rounded-lg shadow-md"
+      onSubmit={handleSubmit}
     >
       <div>
-        <label htmlFor="secretContent" className="block text-sm font-medium text-gray-300 mb-1">
-          Your Secret Content
-        </label>
-        <textarea
-          id="secretContent"
-          name="secretContent"
-          rows={6}
-          className="w-full p-3 border border-gray-600 rounded-md shadow-sm bg-gray-700 text-white focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-500"
-          placeholder="Enter your secret message here..."
-          value={content}
-          onChange={(e) => { setContent(e.target.value); }}
-          disabled={isLoading}
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="expiresInMinutes" className="block text-sm font-medium text-gray-300 mb-1">
-          Expires in (minutes, optional)
-        </label>
-        <input
-          id="expiresInMinutes"
-          name="expiresInMinutes"
-          type="number"
-          min="1"
-          className="w-full p-3 border border-gray-600 rounded-md shadow-sm bg-gray-700 text-white focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-500"
-          placeholder="e.g., 60 for 1 hour"
-          value={expiresInMinutes}
-          onChange={(e) => { setExpiresInMinutes(e.target.value); }}
-          disabled={isLoading}
-        />
-      </div>
-      {error && (
-        <div className="p-3 bg-red-700 border border-red-900 text-red-100 rounded-md">
-          <p>{error}</p>
-        </div>
-      )}
-      <div>
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-gray-900 disabled:opacity-50 transition duration-150 ease-in-out"
-        >
-          {isLoading ? 'Creating...' : 'Create Secret & Get Link'}
+        <button type="submit">
+          Create Another Secret
         </button>
       </div>
     </form>
-  );
-};
-
-export default CreateSecretForm;
+  );}
