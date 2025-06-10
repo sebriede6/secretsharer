@@ -64,9 +64,11 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) 
       onSecretCreated(result.id);
       setContent('');
       setExpiresInMinutes('');
-    } catch (err) {
+    } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
+      } else if (typeof err === 'string') {
+        setError(err);
       } else {
         setError('An unknown error occurred.');
       }
@@ -76,9 +78,8 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) 
   };
 
   function handleFormSubmit(event: React.FormEvent<HTMLFormElement>): void {
-    handleSubmit(event).catch((err) => {
-      console.error('Form submission promise rejected (should be handled in handleSubmit):', err);
-    });
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    void handleSubmit(event);
   }
 
   if (createdSecretId) {
@@ -124,6 +125,7 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) 
   }
 
   return (
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     <form
       onSubmit={handleFormSubmit}
       className="space-y-6 p-6 bg-gray-800 rounded-lg shadow-md"
