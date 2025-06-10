@@ -76,9 +76,9 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) 
   };
 
   function handleFormSubmit(event: React.FormEvent<HTMLFormElement>): void {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    void handleSubmit(event);
-    return;
+    handleSubmit(event).catch((err) => {
+      console.error('Form submission promise rejected (should be handled in handleSubmit):', err);
+    });
   }
 
   if (createdSecretId) {
@@ -124,7 +124,6 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) 
   }
 
   return (
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     <form
       onSubmit={handleFormSubmit}
       className="space-y-6 p-6 bg-gray-800 rounded-lg shadow-md"
