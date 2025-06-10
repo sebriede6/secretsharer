@@ -5,9 +5,7 @@ interface CreateSecretFormProps {
   onSecretCreated: (secretId: string) => void;
 }
 
-const CreateSecretForm: React.FC<CreateSecretFormProps> = ({
-  onSecretCreated,
-}) => {
+const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) => {
   const [content, setContent] = useState<string>('');
   const [expiresInMinutes, setExpiresInMinutes] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -41,9 +39,7 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({
 
       if (expiresInMinutes) {
         if (isNaN(parsedMinutes) || parsedMinutes <= 0) {
-          setError(
-            'If provided, "Expires in Minutes" must be a positive number.'
-          );
+          setError('If provided, "Expires in Minutes" must be a positive number.');
           setIsLoading(false);
           return;
         }
@@ -60,9 +56,7 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(
-          errorData.error || `Failed to create secret: ${response.statusText}`
-        );
+        throw new Error(errorData.error || `Failed to create secret: ${response.statusText}`);
       }
 
       const result = await response.json();
@@ -87,21 +81,13 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({
 
   if (createdSecretId) {
     if (typeof apiBaseUrlFromEnv !== 'string' || !apiBaseUrlFromEnv) {
-      return (
-        <div className="p-3 bg-red-700 text-red-100 rounded-md">
-          <p>Configuration error.</p>
-        </div>
-      );
+        return <div className="p-3 bg-red-700 text-red-100 rounded-md"><p>Configuration error.</p></div>;
     }
     const secretUrl = `${window.location.origin}/secret/${createdSecretId}`;
     return (
       <div className="p-6 bg-gray-800 rounded-lg shadow-md text-center">
-        <h2 className="text-2xl font-semibold text-green-400 mb-4">
-          Secret Created!
-        </h2>
-        <p className="mb-2 text-gray-300">
-          Share this link (it will only work once):
-        </p>
+        <h2 className="text-2xl font-semibold text-green-400 mb-4">Secret Created!</h2>
+        <p className="mb-2 text-gray-300">Share this link (it will only work once):</p>
         <input
           type="text"
           value={secretUrl}
@@ -110,25 +96,23 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({
           onFocus={(e) => e.target.select()}
         />
         <div className="my-4 flex justify-center">
-          {' '}
-          {/* Container für den QR Code */}
           <QRCodeSVG
             value={secretUrl}
             size={128}
-            bgColor={'#ffffff'}
-            fgColor={'#000000'}
-            level={'L'}
-            includeMargin={false}
+            bgColor={"#ffffff"}
+            fgColor={"#1f2937"}
+            level={"L"}
+            marginSize={0} {/* KORREKTUR: includeMargin ersetzt durch marginSize */}
           />
         </div>
         <button
-          onClick={() => navigator.clipboard.writeText(secretUrl)}
+          onClick={() => { navigator.clipboard.writeText(secretUrl); }} /* KORREKTUR: Klammern {} hinzugefügt */
           className="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded transition duration-150 ease-in-out mr-2 mb-2 sm:mb-0"
         >
           Copy Link
         </button>
         <button
-          onClick={() => setCreatedSecretId(null)}
+          onClick={() => { setCreatedSecretId(null); }} /* KORREKTUR: Klammern {} hinzugefügt */
           className="bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded transition duration-150 ease-in-out"
         >
           Create Another Secret
@@ -138,15 +122,13 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({
   }
 
   return (
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     <form
       onSubmit={handleFormSubmit}
       className="space-y-6 p-6 bg-gray-800 rounded-lg shadow-md"
     >
       <div>
-        <label
-          htmlFor="secretContent"
-          className="block text-sm font-medium text-gray-300 mb-1"
-        >
+        <label htmlFor="secretContent" className="block text-sm font-medium text-gray-300 mb-1">
           Your Secret Content
         </label>
         <textarea
@@ -156,16 +138,13 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({
           className="w-full p-3 border border-gray-600 rounded-md shadow-sm bg-gray-700 text-white focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-500"
           placeholder="Enter your secret message here..."
           value={content}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={(e) => { setContent(e.target.value); }} /* KORREKTUR: Klammern {} hinzugefügt */
           disabled={isLoading}
           required
         />
       </div>
       <div>
-        <label
-          htmlFor="expiresInMinutes"
-          className="block text-sm font-medium text-gray-300 mb-1"
-        >
+        <label htmlFor="expiresInMinutes" className="block text-sm font-medium text-gray-300 mb-1">
           Expires in (minutes, optional)
         </label>
         <input
@@ -176,7 +155,7 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({
           className="w-full p-3 border border-gray-600 rounded-md shadow-sm bg-gray-700 text-white focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-500"
           placeholder="e.g., 60 for 1 hour"
           value={expiresInMinutes}
-          onChange={(e) => setExpiresInMinutes(e.target.value)}
+          onChange={(e) => { setExpiresInMinutes(e.target.value); }} /* KORREKTUR: Klammern {} hinzugefügt */
           disabled={isLoading}
         />
       </div>

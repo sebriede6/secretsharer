@@ -28,7 +28,7 @@
       "cross-env ESLINT_USE_FLAT_CONFIG=false npx eslint --fix --cwd ./backend",
       "prettier --write --cwd ./backend"
     ],
-    "*.{json,md,yml,yaml}": [ 
+    "*.{json,md,yml,yaml}": [
       "prettier --write"
     ]
   }
