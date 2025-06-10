@@ -1,6 +1,6 @@
 # Ephemeral Secret Sharer
 
-Ephemeral Secret Sharer ist eine Webanwendung zum sicheren Teilen von einmalig abrufbaren Text-Secrets. Die Secrets werden serverseitig verschlüsselt und nach dem ersten Abruf oder optional nach einer definierten Ablaufzeit automatisch gelöscht. Ich habe es auf Azure in einem Cluster deployt, erreichbar unter der IP: http://57.153.20.140/
+Ephemeral Secret Sharer ist eine Webanwendung zum sicheren Teilen von einmalig abrufbaren Text-Secrets. Die Secrets werden serverseitig verschlüsselt und nach dem ersten Abruf oder optional nach einer definierten Ablaufzeit automatisch gelöscht. Ich habe es auf Azure in einem Cluster deployt, erreichbar unter der IP: http://9.163.157.41/
 
 ## Features
 
