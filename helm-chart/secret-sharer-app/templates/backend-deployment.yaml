@@ -18,8 +18,12 @@ spec:
         app.kubernetes.io/component: backend
     spec:
       serviceAccountName: {{ include "secret-sharer-app.serviceAccountName" . }}
+      securityContext:
+        {{- include "secret-sharer-app.podSecurityContext" . | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}-backend
+        - name: {{ .Chart.Name }}-backend # Name des Containers
+          securityContext:
+            {{- include "secret-sharer-app.securityContext" . | nindent 12 }}
           image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
           ports:
@@ -27,13 +31,37 @@ spec:
               containerPort: {{ .Values.backend.service.port }}
               protocol: TCP
           env:
-            - name: POSTGRESQL_PASSWORD
+            - name: NODE_ENV
+              value: "production"
+            - name: DATABASE_HOST
+              value: "{{ .Release.Name }}-postgresql" # Korrekter Service-Name für PostgreSQL
+            - name: DATABASE_NAME
+              value: {{ .Values.postgresql.auth.database | quote }}
+            - name: DATABASE_USER
+              value: {{ .Values.postgresql.auth.username | quote }}
+            - name: DATABASE_PORT
+              value: "5432"
+            - name: DATABASE_PASSWORD # Diese Variable wird von db.js verwendet
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "secret-sharer-app.fullname" . }}-postgresql
-                  key: postgres-password
+                  name: {{ .Values.postgresql.auth.existingSecret }} # Sollte "postgresql-secret" aus values.yaml sein
+                  key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey }} # Sollte "postgresql-password" aus values.yaml sein
+            - name: FRONTEND_URL
+              value: {{ .Values.backend.frontendUrlPlaceholder | default "http://temp.placeholder.com" | quote }}
           envFrom:
             - secretRef:
-                name: {{ include "secret-sharer-app.fullname" . }}-backend-secrets
+                name: {{ .Values.backend.envFromSecret }} # Sollte "backend-secrets" aus values.yaml sein
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
           resources:
-            {{- toYaml .Values.backend.resources | nindent 12 }}
+            {{- .Values.backend.resources | default .Values.resources | toYaml | nindent 12 }}
