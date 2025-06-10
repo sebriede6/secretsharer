@@ -93,7 +93,7 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) 
           value={secretUrl}
           readOnly
           className="w-full p-2 border border-gray-600 rounded bg-gray-700 text-white mb-4 focus:ring-indigo-500 focus:border-indigo-500"
-          onFocus={(e) => e.target.select()}
+          onFocus={(e) => { e.target.select(); }}
         />
         <div className="my-4 flex justify-center">
           <QRCodeSVG
@@ -102,17 +102,17 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) 
             bgColor={"#ffffff"}
             fgColor={"#1f2937"}
             level={"L"}
-            marginSize={0} {/* KORREKTUR: includeMargin ersetzt durch marginSize */}
+            marginSize={0}
           />
         </div>
         <button
-          onClick={() => { navigator.clipboard.writeText(secretUrl); }} /* KORREKTUR: Klammern {} hinzugefügt */
+          onClick={() => { navigator.clipboard.writeText(secretUrl); }}
           className="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded transition duration-150 ease-in-out mr-2 mb-2 sm:mb-0"
         >
           Copy Link
         </button>
         <button
-          onClick={() => { setCreatedSecretId(null); }} /* KORREKTUR: Klammern {} hinzugefügt */
+          onClick={() => { setCreatedSecretId(null); }}
           className="bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded transition duration-150 ease-in-out"
         >
           Create Another Secret
@@ -138,7 +138,7 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) 
           className="w-full p-3 border border-gray-600 rounded-md shadow-sm bg-gray-700 text-white focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-500"
           placeholder="Enter your secret message here..."
           value={content}
-          onChange={(e) => { setContent(e.target.value); }} /* KORREKTUR: Klammern {} hinzugefügt */
+          onChange={(e) => { setContent(e.target.value); }}
           disabled={isLoading}
           required
         />
@@ -155,7 +155,7 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) 
           className="w-full p-3 border border-gray-600 rounded-md shadow-sm bg-gray-700 text-white focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-500"
           placeholder="e.g., 60 for 1 hour"
           value={expiresInMinutes}
-          onChange={(e) => { setExpiresInMinutes(e.target.value); }} /* KORREKTUR: Klammern {} hinzugefügt */
+          onChange={(e) => { setExpiresInMinutes(e.target.value); }}
           disabled={isLoading}
         />
       </div>
