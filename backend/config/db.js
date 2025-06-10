@@ -2,14 +2,14 @@ import pg from 'pg';
 import dotenv from 'dotenv';
 import logger from './logger.js';
 
-// Load environment variables based on NODE_ENV
+
 dotenv.config({
   path: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
 });
 
 const { Pool } = pg;
 
-// Normalize the database credentials for tests
+
 const dbConfig = {
   user: process.env.DATABASE_USER || 'user',
   host: process.env.DATABASE_HOST || 'localhost',

@@ -13,8 +13,10 @@ backend:
   service:
     type: ClusterIP
     port: 3001
-  envFromSecret: backend-secrets
   frontendUrlPlaceholder: "http://TEMP_IP_PLACEHOLDER"
+  secrets:
+    secretKeyCrypto: "PLATZHALTER_ODER_DUMMY_BASE64_KEY"
+    jwtSecret: "PLATZHALTER_ODER_DUMMY_BASE64_JWT"
   resources: {}
 
 frontend:
@@ -36,6 +38,7 @@ postgresql:
     database: "secret_sharer_db"
     existingSecret: "postgresql-secret"
     secretKeys:
+      adminPasswordKey: "postgres-password"
       userPasswordKey: "postgresql-password"
   primary:
     persistence:
@@ -55,8 +58,6 @@ serviceAccount:
   name: ""
 
 podSecurityContext: {}
-
 securityContext: {}
-
 ingress:
   enabled: false

@@ -5,12 +5,12 @@ import { query, pool as dbPool } from '../config/db.js';
 describe('Secrets API', () => {
   beforeAll(async () => {
     try {
-      // Ensure we're using test database
+      
       process.env.NODE_ENV = 'test';
       process.env.DATABASE_NAME = 'testdb_ci';
 
       await startApp();
-      // Create fresh table for tests with all required columns
+      
       await query('DROP TABLE IF EXISTS secrets;', []);
       await query(
         `
