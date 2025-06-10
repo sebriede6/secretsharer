@@ -141,4 +141,5 @@ if (pool && process.env.NODE_ENV !== 'test') {
     });
 }
 
+
 export { query, initializeDB, pool };
