@@ -22,9 +22,6 @@ export default tseslint.config(
       globals: {
         ...globals.browser,
         ...globals.es2021,
-        window: 'readonly',
-        navigator: 'readonly',
-        fetch: 'readonly',
       }
     },
     settings: {
@@ -33,16 +30,26 @@ export default tseslint.config(
       },
     },
     rules: {
+      ...eslintPluginReact.configs.recommended.rules,
+      ...eslintPluginReact.configs['jsx-runtime'].rules,
+      ...eslintPluginReactHooks.configs.recommended.rules,
+
       'react/prop-types': 'off',
-      '@typescript-eslint/no-unused-vars': ['warn', { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' , varsIgnorePattern: '^_' }],
       '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
+      '@typescript-eslint/no-floating-promises': 'warn',
+      '@typescript-eslint/no-misused-promises': 'error',
+
+
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',
       '@typescript-eslint/no-unsafe-return': 'off',
       '@typescript-eslint/no-unsafe-argument': 'off',
-      '@typescript-eslint/no-misused-promises': 'off',
+      '@typescript-eslint/no-deprecated': 'warn',
+      '@typescript-eslint/no-confusing-void-expression': 'warn',
     },
   },
   eslintPluginPrettierRecommended,
