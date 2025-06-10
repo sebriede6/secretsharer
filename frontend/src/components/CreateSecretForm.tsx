@@ -78,7 +78,6 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) 
   };
 
   function handleFormSubmit(event: React.FormEvent<HTMLFormElement>): void {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     void handleSubmit(event);
   }
 
@@ -109,7 +108,12 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) 
           />
         </div>
         <button
-          onClick={() => { navigator.clipboard.writeText(secretUrl); }}
+          onClick={() => {
+            navigator.clipboard.writeText(secretUrl).catch(clipboardErr => {
+              console.error('Failed to copy link to clipboard:', clipboardErr);
+              setError('Failed to copy link. Please copy it manually.');
+            });
+          }}
           className="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded transition duration-150 ease-in-out mr-2 mb-2 sm:mb-0"
         >
           Copy Link
@@ -125,7 +129,6 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({ onSecretCreated }) 
   }
 
   return (
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     <form
       onSubmit={handleFormSubmit}
       className="space-y-6 p-6 bg-gray-800 rounded-lg shadow-md"
