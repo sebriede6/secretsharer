@@ -1,15 +1,20 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 
+const COUNTDOWN_SECONDS = 30;
+
 const ViewSecret: React.FC = () => {
-  const { secretId } = useParams<{ secretId: string | undefined }>();
+  const { secretId } = useParams<{ secretId: string }>();
   const [secretContent, setSecretContent] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [hasFetched, setHasFetched] = useState<boolean>(false);
+  const fetchAttemptedRef = useRef(false);
+
+  const [countdown, setCountdown] = useState<number>(COUNTDOWN_SECONDS);
+  const [isBurned, setIsBurned] = useState<boolean>(false);
+  const timerIdRef = useRef<number | null>(null);
 
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-  const fetchAttemptedRef = useRef(false);
 
   useEffect(() => {
     if (!secretId) {
@@ -17,6 +22,7 @@ const ViewSecret: React.FC = () => {
       setIsLoading(false);
       return;
     }
+
     if (fetchAttemptedRef.current) {
       return;
     }
@@ -26,14 +32,9 @@ const ViewSecret: React.FC = () => {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await fetch(
-          `${String(apiBaseUrl)}/secrets/${secretId}`
-        );
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        const response = await fetch(`${apiBaseUrl}/secrets/${secretId}`);
         if (response.status === 404) {
-          if (hasFetched) {
-            setIsLoading(false);
-            return;
-          }
           throw new Error('Secret not found, already viewed, or expired.');
         }
         if (!response.ok) {
@@ -44,14 +45,11 @@ const ViewSecret: React.FC = () => {
         }
         const data = await response.json();
         setSecretContent(data.content);
-        setHasFetched(true);
-      } catch (err) {
-        if (!hasFetched) {
-          if (err instanceof Error) {
-            setError(err.message);
-          } else {
-            setError('An unknown error occurred while fetching the secret.');
-          }
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unknown error occurred while fetching the secret.');
         }
       } finally {
         setIsLoading(false);
@@ -59,28 +57,40 @@ const ViewSecret: React.FC = () => {
     };
 
     void fetchSecret();
-  }, [secretId, apiBaseUrl, hasFetched]);
+  }, [secretId, apiBaseUrl]);
 
-  if (isLoading && !hasFetched) {
+  useEffect(() => {
+    if (secretContent && !isBurned) {
+      setCountdown(COUNTDOWN_SECONDS);
+      timerIdRef.current = window.setInterval(() => {
+        setCountdown((prevCountdown) => prevCountdown - 1);
+      }, 1000);
+    } else {
+      if (timerIdRef.current) {
+        window.clearInterval(timerIdRef.current);
+      }
+    }
+    return () => {
+      if (timerIdRef.current) {
+        window.clearInterval(timerIdRef.current);
+      }
+    };
+  }, [secretContent, isBurned]);
+
+  useEffect(() => {
+    if (countdown <= 0 && secretContent && !isBurned) {
+      if (timerIdRef.current) {
+        window.clearInterval(timerIdRef.current);
+      }
+      setIsBurned(true);
+      setSecretContent(null);
+    }
+  }, [countdown, secretContent, isBurned]);
+
+  if (isLoading) {
     return (
       <div className="p-6 bg-gray-800 rounded-lg shadow-md text-center">
         <p className="text-xl text-gray-300">Loading secret...</p>
-      </div>
-    );
-  }
-
-  if (secretContent) {
-    return (
-      <div className="p-6 bg-gray-800 rounded-lg shadow-md">
-        <h2 className="text-2xl font-semibold text-indigo-400 mb-4 text-center">
-          Your Secret:
-        </h2>
-        <div className="p-4 bg-gray-700 rounded whitespace-pre-wrap break-words">
-          <p className="text-gray-200">{secretContent}</p>
-        </div>
-        <p className="text-sm text-gray-500 mt-4 text-center">
-          This secret has now been deleted from the server.
-        </p>
       </div>
     );
   }
@@ -94,9 +104,48 @@ const ViewSecret: React.FC = () => {
     );
   }
 
+  if (isBurned) {
+    return (
+      <div className="p-6 bg-gray-800 rounded-lg shadow-md text-center">
+        <h2 className="text-2xl font-semibold text-orange-400 mb-4">
+          Secret Burned
+        </h2>
+        <p className="text-gray-300">
+          This secret has been displayed and is now gone.
+        </p>
+        <p className="text-sm text-gray-500 mt-2">
+          It has also been deleted from the server.
+        </p>
+      </div>
+    );
+  }
+
+  if (secretContent) {
+    return (
+      <div className="p-6 bg-gray-800 rounded-lg shadow-md">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-semibold text-indigo-400">
+            Your Secret:
+          </h2>
+          <div className="text-sm text-yellow-400 tabular-nums">
+            Self-destructs in: {countdown}s
+          </div>
+        </div>
+        <div className="p-4 bg-gray-700 rounded whitespace-pre-wrap break-words min-h-[100px]">
+          <p className="text-gray-200">{secretContent}</p>
+        </div>
+        <p className="text-sm text-gray-500 mt-4 text-center">
+          This secret has now been deleted from the server.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 bg-gray-800 rounded-lg shadow-md text-center">
-      <p className="text-xl text-gray-300">No secret to display.</p>
+      <p className="text-xl text-gray-300">
+        No secret to display or already burned.
+      </p>
     </div>
   );
 };
