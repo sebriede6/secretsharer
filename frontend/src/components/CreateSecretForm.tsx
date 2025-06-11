@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/use-unknown-in-catch-callback-variable */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import React, { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -17,7 +15,8 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({
   const [createdSecretId, setCreatedSecretId] = useState<string | null>(null);
   const [generatedPassword, setGeneratedPassword] = useState<string>('');
   const [passwordCopied, setPasswordCopied] = useState<boolean>(false);
-  const [passwordLength, setPasswordLength] = useState<number>(16); // Neuer State für Passwortlänge
+  const [passwordLength, setPasswordLength] = useState<number>(16);
+  const [feedbackMessage, setFeedbackMessage] = useState<string>('');
 
   const apiBaseUrlFromEnv = import.meta.env.VITE_API_BASE_URL;
 
@@ -26,21 +25,81 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({
   ) => {
     const length = parseInt(e.target.value, 10);
     if (length > 0 && length <= 128) {
-      // Begrenze die Länge sinnvoll
       setPasswordLength(length);
     } else if (e.target.value === '') {
-      setPasswordLength(0); // Erlaube leeres Feld, um Default zu nutzen oder Fehler zu zeigen
+      setPasswordLength(0);
+    }
+  };
+
+  const showFeedback = (message: string) => {
+    setFeedbackMessage(message);
+    setTimeout(() => {
+      setFeedbackMessage('');
+    }, 3000);
+  };
+
+  const copyToClipboardInternal = (
+    textToCopy: string,
+    successMessage: string
+  ) => {
+    setError(null);
+    if (
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      navigator.clipboard &&
+      typeof navigator.clipboard.writeText === 'function'
+    ) {
+      navigator.clipboard
+        .writeText(textToCopy)
+        .then(() => {
+          console.log(`${successMessage} (API)`);
+          showFeedback(successMessage);
+          if (textToCopy === generatedPassword) setPasswordCopied(true);
+        })
+        .catch((err: unknown) => {
+          console.error(`Failed to copy with API:`, err);
+          setError(`Failed to copy. Please copy manually.`);
+        });
+    } else {
+      console.warn('Clipboard API not available. Attempting fallback.');
+      try {
+        const tempTextArea = document.createElement('textarea');
+        tempTextArea.value = textToCopy;
+        tempTextArea.style.position = 'fixed';
+        tempTextArea.style.left = '-9999px';
+        tempTextArea.style.top = '-9999px';
+        document.body.appendChild(tempTextArea);
+        tempTextArea.focus();
+        tempTextArea.select();
+        let success = false;
+        try {
+          success = document.execCommand('copy');
+        } catch (execErr) {
+          console.error('execCommand copy error:', execErr);
+        }
+        document.body.removeChild(tempTextArea);
+
+        if (success) {
+          console.log(`${successMessage} (Fallback)`);
+          showFeedback(`${successMessage} (Fallback)`);
+          if (textToCopy === generatedPassword) setPasswordCopied(true);
+        } else {
+          throw new Error('execCommand copy returned false or failed');
+        }
+      } catch (fallbackErr) {
+        console.error('Fallback copy mechanism failed:', fallbackErr);
+        setError('Failed to copy. Please copy manually.');
+      }
     }
   };
 
   const generatePassword = () => {
-    // Nimmt die Länge jetzt aus dem State
     if (passwordLength <= 0) {
       setError('Please enter a valid password length (e.g., 8-128).');
       setGeneratedPassword('');
       return;
     }
-    setError(null); // Fehler löschen, falls vorher einer da war
+    setError(null);
+    setFeedbackMessage('');
     const charset =
       'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=';
     let newPassword = '';
@@ -49,24 +108,7 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({
     }
     setGeneratedPassword(newPassword);
     setPasswordCopied(false);
-    if (
-      navigator.clipboard &&
-      typeof navigator.clipboard.writeText === 'function'
-    ) {
-      navigator.clipboard
-        .writeText(newPassword)
-        .then(() => {
-          setPasswordCopied(true);
-        })
-        .catch((err) => {
-          console.error('Failed to copy generated password:', err);
-          setError('Failed to auto-copy password. Please copy it manually.');
-        });
-    } else {
-      console.warn(
-        'Clipboard API not available. Password generated but not copied.'
-      );
-    }
+    copyToClipboardInternal(newPassword, 'Password copied!');
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -74,6 +116,7 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({
     setIsLoading(true);
     setError(null);
     setCreatedSecretId(null);
+    setFeedbackMessage('');
 
     if (typeof apiBaseUrlFromEnv !== 'string' || !apiBaseUrlFromEnv) {
       setError('API configuration error: Base URL is missing.');
@@ -138,7 +181,7 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({
     }
   };
 
-  function handleFormSubmit(event: React.FormEvent<HTMLFormElement>) {
+  function handleFormSubmit(event: React.FormEvent<HTMLFormElement>): void {
     void handleSubmit(event);
   }
 
@@ -178,26 +221,12 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({
             marginSize={0}
           />
         </div>
+        {feedbackMessage && (
+          <p className="text-sm text-green-400 mb-2">{feedbackMessage}</p>
+        )}
         <button
           onClick={() => {
-            if (
-              navigator.clipboard &&
-              typeof navigator.clipboard.writeText === 'function'
-            ) {
-              navigator.clipboard
-                .writeText(secretUrl)
-                .catch((clipboardErr: unknown) => {
-                  console.error(
-                    'Failed to copy link to clipboard:',
-                    clipboardErr
-                  );
-                  setError('Failed to copy link. Please copy it manually.');
-                });
-            } else {
-              setError(
-                'Clipboard API not available. Please copy link manually.'
-              );
-            }
+            copyToClipboardInternal(secretUrl, 'Link copied!');
           }}
           className="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded transition duration-150 ease-in-out mr-2 mb-2 sm:mb-0"
         >
@@ -206,6 +235,8 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({
         <button
           onClick={() => {
             setCreatedSecretId(null);
+            setFeedbackMessage('');
+            setError(null);
           }}
           className="bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded transition duration-150 ease-in-out"
         >
@@ -240,30 +271,36 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({
           disabled={isLoading}
           required
         />
-        <div className="mt-2 flex items-center space-x-2">
-          <label
-            htmlFor="passwordLength"
-            className="text-xs text-gray-400 whitespace-nowrap"
-          >
-            Length:
-          </label>
-          <input
-            type="number"
-            id="passwordLength"
-            value={passwordLength === 0 ? '' : passwordLength}
-            onChange={handlePasswordLengthChange}
-            min="8"
-            max="128"
-            className="w-16 p-1 text-xs border border-gray-600 rounded-md bg-gray-700 text-white focus:ring-indigo-500 focus:border-indigo-500"
-          />
+
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div className="flex items-center space-x-2">
+            <label
+              htmlFor="passwordLength"
+              className="text-xs text-gray-400 whitespace-nowrap"
+            >
+              Length:
+            </label>
+            <input
+              type="number"
+              id="passwordLength"
+              value={passwordLength === 0 ? '' : passwordLength}
+              onChange={handlePasswordLengthChange}
+              min="8"
+              max="128"
+              className="w-16 p-1 text-xs border border-gray-600 rounded-md bg-gray-700 text-white focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
           <button
             type="button"
-            onClick={generatePassword}
-            className="text-xs bg-teal-600 hover:bg-teal-700 text-white py-1 px-3 rounded whitespace-nowrap"
+            onClick={() => {
+              generatePassword();
+            }}
+            className="text-xs bg-teal-600 hover:bg-teal-700 text-white py-1.5 px-3 rounded whitespace-nowrap"
           >
-            Generate Password
+            Generate & Copy Password
           </button>
         </div>
+
         {generatedPassword && (
           <div className="mt-2 text-xs text-green-400">
             <p className="break-all">
@@ -277,6 +314,7 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({
               type="button"
               onClick={() => {
                 setContent(generatedPassword);
+                setFeedbackMessage('');
               }}
               className="mt-1 text-xs underline hover:text-green-300"
             >
@@ -311,6 +349,11 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({
       {error && (
         <div className="p-3 bg-red-700 border border-red-900 text-red-100 rounded-md my-4">
           <p>{error}</p>
+        </div>
+      )}
+      {feedbackMessage && !error && (
+        <div className="p-3 bg-green-700 border border-green-900 text-green-100 rounded-md my-4">
+          <p>{feedbackMessage}</p>
         </div>
       )}
 
