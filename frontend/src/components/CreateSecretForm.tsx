@@ -72,6 +72,7 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({
         tempTextArea.select();
         let success = false;
         try {
+          // eslint-disable-next-line @typescript-eslint/no-deprecated
           success = document.execCommand('copy');
         } catch (execErr) {
           console.error('execCommand copy error:', execErr);
