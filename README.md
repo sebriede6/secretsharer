@@ -9,6 +9,7 @@ IP: http://9.163.157.41/
 ## Features
 
 - Erstellen von Text-Secrets.
+- Generieren eines starken Passwortes mit Länge nach Wahl
 - Generierung eines einzigartigen, teilbaren Links.
 - Secrets können nur einmal abgerufen werden.
 - Optionale Ablaufzeit für Secrets.
