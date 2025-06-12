@@ -1,33 +1,27 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-
 const COUNTDOWN_SECONDS = 30;
-
 const ViewSecret: React.FC = () => {
   const { secretId } = useParams<{ secretId: string }>();
   const [secretContent, setSecretContent] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const fetchAttemptedRef = useRef(false);
-
   const [countdown, setCountdown] = useState<number>(COUNTDOWN_SECONDS);
   const [isBurned, setIsBurned] = useState<boolean>(false);
+  const [isBlinking, setIsBlinking] = useState<boolean>(false);
   const timerIdRef = useRef<number | null>(null);
-
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-
   useEffect(() => {
     if (!secretId) {
-      setError('No secret ID provided.');
+      setError('Kein Secret-ID angegeben.');
       setIsLoading(false);
       return;
     }
-
     if (fetchAttemptedRef.current) {
       return;
     }
     fetchAttemptedRef.current = true;
-
     const fetchSecret = async () => {
       setIsLoading(true);
       setError(null);
@@ -35,12 +29,15 @@ const ViewSecret: React.FC = () => {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         const response = await fetch(`${apiBaseUrl}/secrets/${secretId}`);
         if (response.status === 404) {
-          throw new Error('Secret not found, already viewed, or expired.');
+          throw new Error(
+            'Secret nicht gefunden, bereits angesehen oder abgelaufen.'
+          );
         }
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(
-            errorData.error || `Failed to fetch secret: ${response.statusText}`
+            errorData.error ||
+              `Fehler beim Abrufen des Secrets: ${response.statusText}`
           );
         }
         const data = await response.json();
@@ -49,16 +46,14 @@ const ViewSecret: React.FC = () => {
         if (err instanceof Error) {
           setError(err.message);
         } else {
-          setError('An unknown error occurred while fetching the secret.');
+          setError('Ein unbekannter Fehler ist aufgetreten.');
         }
       } finally {
         setIsLoading(false);
       }
     };
-
     void fetchSecret();
   }, [secretId, apiBaseUrl]);
-
   useEffect(() => {
     if (secretContent && !isBurned) {
       setCountdown(COUNTDOWN_SECONDS);
@@ -76,7 +71,6 @@ const ViewSecret: React.FC = () => {
       }
     };
   }, [secretContent, isBurned]);
-
   useEffect(() => {
     if (countdown <= 0 && secretContent && !isBurned) {
       if (timerIdRef.current) {
@@ -85,69 +79,79 @@ const ViewSecret: React.FC = () => {
       setIsBurned(true);
       setSecretContent(null);
     }
+    if (countdown <= 10 && countdown > 0) {
+      setIsBlinking(true);
+    } else {
+      setIsBlinking(false);
+    }
   }, [countdown, secretContent, isBurned]);
-
+  const backgroundColor = isBurned
+    ? 'bg-red-600'
+    : isBlinking
+      ? 'bg-red-500 animate-blink'
+      : 'bg-gray-800';
   if (isLoading) {
     return (
-      <div className="p-6 bg-gray-800 rounded-lg shadow-md text-center">
-        <p className="text-xl text-gray-300">Loading secret...</p>
+      <div
+        className={`p-6 ${backgroundColor} rounded-lg shadow-md text-center`}
+      >
+        <p className="text-xl text-gray-300">Lade Secret...</p>
       </div>
     );
   }
-
   if (error) {
     return (
-      <div className="p-6 bg-red-800 border border-red-700 rounded-lg shadow-md text-center">
-        <h2 className="text-2xl font-semibold text-red-300 mb-3">Error</h2>
+      <div
+        className={`p-6 ${backgroundColor} border border-red-700 rounded-lg shadow-md text-center`}
+      >
+        <h2 className="text-2xl font-semibold text-red-300 mb-3">Fehler</h2>
         <p className="text-red-200">{error}</p>
       </div>
     );
   }
-
   if (isBurned) {
     return (
-      <div className="p-6 bg-gray-800 rounded-lg shadow-md text-center">
+      <div
+        className={`p-6 ${backgroundColor} rounded-lg shadow-md text-center`}
+      >
         <h2 className="text-2xl font-semibold text-orange-400 mb-4">
-          Secret Burned
+          Secret verbrannt
         </h2>
         <p className="text-gray-300">
-          This secret has been displayed and is now gone.
+          Dieses Secret wurde angezeigt und ist jetzt verschwunden.
         </p>
         <p className="text-sm text-gray-500 mt-2">
-          It has also been deleted from the server.
+          Es wurde auch vom Server gelöscht.
         </p>
       </div>
     );
   }
-
   if (secretContent) {
     return (
-      <div className="p-6 bg-gray-800 rounded-lg shadow-md">
+      <div className={`p-6 ${backgroundColor} rounded-lg shadow-md`}>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-semibold text-indigo-400">
-            Your Secret:
+            Ihr Secret:
           </h2>
           <div className="text-sm text-yellow-400 tabular-nums">
-            Self-destructs in: {countdown}s
+            Selbstzerstört in: {countdown}s
           </div>
         </div>
         <div className="p-4 bg-gray-700 rounded whitespace-pre-wrap break-words min-h-[100px]">
           <p className="text-gray-200">{secretContent}</p>
         </div>
         <p className="text-sm text-gray-500 mt-4 text-center">
-          This secret has now been deleted from the server.
+          Dieses Secret wurde jetzt vom Server gelöscht.
         </p>
       </div>
     );
   }
-
   return (
-    <div className="p-6 bg-gray-800 rounded-lg shadow-md text-center">
+    <div className={`p-6 ${backgroundColor} rounded-lg shadow-md text-center`}>
       <p className="text-xl text-gray-300">
-        No secret to display or already burned.
+        Kein Secret zum Anzeigen oder bereits verbrannt.
       </p>
     </div>
   );
 };
-
 export default ViewSecret;
