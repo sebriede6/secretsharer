@@ -52,6 +52,7 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({
           setError('Fehler beim Kopieren. Bitte manuell kopieren.');
         });
     } else {
+      // Fallback für Browser, die die Clipboard API nicht unterstützen
       const tempTextArea = document.createElement('textarea');
       tempTextArea.value = textToCopy;
       document.body.appendChild(tempTextArea);
