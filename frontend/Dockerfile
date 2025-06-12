@@ -1,7 +1,7 @@
 FROM node:23.5.0-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --omit=dev --ignore-scripts
 COPY . .
 RUN npm run build
 
