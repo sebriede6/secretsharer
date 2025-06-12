@@ -139,7 +139,84 @@ Husky und lint-staged sind im Hauptprojekt konfiguriert, um ESLint und Prettier 
 
 ## CI-Pipeline (GitHub Actions)
 
-Ein Workflow in `.github/workflows/ci-pipeline.yml` führt bei jedem Push und Pull Request zum `main`-Branch automatisch Linting und Tests für Backend und Frontend aus.
+Dieses Projekt verwendet eine GitHub Actions CI-Pipeline, um die Code-Qualität sicherzustellen und den Build- sowie Veröffentlichungsprozess der Frontend- und Backend-Anwendungen zu automatisieren.
+Workflow-Trigger
+
+Der CI-Workflow wird automatisch bei folgenden Ereignissen ausgelöst:
+
+Push auf den main-Branch.
+
+Erstellung oder Aktualisierung eines Pull Requests, der auf den main-Branch zielt.
+
+Hauptaufgaben der erweiterten CI-Pipeline
+
+Die Pipeline führt eine Reihe von Schritten für das Backend und das Frontend aus:
+
+Code-Checkout:
+
+Der aktuelle Code des entsprechenden Branches oder Pull Requests wird in die virtuelle Umgebung des GitHub Actions Runners geladen.
+
+Umgebung einrichten:
+
+Node.js wird in der spezifizierten Version 22 eingerichtet.
+
+Abhängigkeiten werden über npm ci für Backend und Frontend separat installiert, wobei der npm-Cache für schnellere Builds genutzt wird.
+
+Für die Backend-Tests wird ein PostgreSQL Service-Container gestartet und eine Test-Datenbankumgebung (.env.test) mit den notwendigen Secrets (wie SECRET_KEY_CRYPTO und TEST_JWT_SECRET aus den GitHub Repository Secrets) und Datenbank-Zugangsdaten konfiguriert.
+ Ein PostgreSQL-Client wird installiert, um die Bereitschaft der Datenbank zu überprüfen (pg_isready).
+
+Code-Qualität und Tests:
+
+Backend:
+
+Linting: Der Code wird mit ESLint auf Stil- und Syntaxfehler geprüft (npm run lint).
+
+Tests: Unit- und Integrationstests werden mit Jest ausgeführt (npm test), inklusive der Generierung eines Coverage-Reports.
+
+ Die Tests laufen gegen die im Service-Container bereitgestellte PostgreSQL-Datenbank.
+
+Frontend:
+Linting: Der Code wird mit ESLint auf Stil- und Syntaxfehler geprüft (npm run lint).
+
+Type Checking: Die TypeScript-Typintegrität wird mit tsc --noEmit überprüft (npm run typecheck).
+
+Build: Die React-Anwendung wird mit npm run build (via tsc -b && vite build) für die Produktion gebaut.
+
+Docker Image Packaging (Bau):
+Dieser Schritt wird nur ausgeführt, wenn der Workflow durch einen Push auf den main-Branch getriggert wurde.
+
+Mit docker/setup-buildx-action wird Docker Buildx für optimierte Builds eingerichtet.
+
+Für das Backend und das Frontend werden separate Docker-Images gebaut:
+Kontext: Der jeweilige Unterordner (./backend bzw. ./frontend).
+
+Dockerfile: Das entsprechende Dockerfile im jeweiligen Unterordner wird verwendet (beide nutzen Multi-Stage Builds für optimierte und sichere Images).
+
+Tagging: Die gebauten Images werden mit zwei Tags versehen:
+:latest: Repräsentiert immer den neuesten Build vom main-Branch.
+:${{ github.sha }}: Ein eindeutiger Tag, der den Git Commit SHA des Builds verwendet. Dies ermöglicht eine präzise Nachverfolgbarkeit und erleichtert Rollbacks.
+
+Artefakt-Speicherung (Push zur Docker Registry):
+
+Dieser Schritt wird ebenfalls nur bei einem Push auf den main-Branch ausgeführt und folgt direkt auf den Image-Bau.
+
+Login: Die Pipeline meldet sich sicher bei Docker Hub an, indem sie die in den GitHub Repository Secrets gespeicherten Zugangsdaten (DOCKERHUB_USERNAME und DOCKERHUB_TOKEN) verwendet (docker/login-action).
+
+Push: Die zuvor gebauten und getaggten Docker-Images für Backend und Frontend werden in die entsprechende Docker Hub Registry (unter DEIN_DOCKERHUB_USERNAME/ephemeral-secret-backend und DEIN_DOCKERHUB_USERNAME/ephemeral-secret-frontend) hochgeladen.
+
+Funktionsweise und Vorteile
+Diese erweiterte CI-Pipeline automatisiert den Prozess von der Code-Überprüfung bis zur Erstellung und Veröffentlichung der lauffähigen Anwendungsartefakte (Docker-Images).
+
+Bau (Build): Die npm run build-Schritte kompilieren den Code und erstellen produktionsreife Assets. Der docker build-Prozess verpackt diese dann in containerisierte Umgebungen.
+
+Packaging: Durch die Multi-Stage Dockerfiles werden schlanke und sichere Images erzeugt, die nur die notwendigen Laufzeitkomponenten enthalten.
+
+Push (Store): Die versionierten Docker-Images werden sicher in Docker Hub gespeichert und stehen für manuelle oder automatisierte Deployments (z.B. auf AKS mit Helm) zur Verfügung.
+
+Durch die Automatisierung dieser Schritte wird die Konsistenz erhöht, Fehler werden frühzeitig erkannt, und der Prozess zur Bereitstellung neuer Versionen wird deutlich beschleunigt und zuverlässiger.
+
+Die Verwendung von eindeutigen Image-Tags (Commit SHA) ist dabei eine Schlüsselpraxis für eine gute Software-Lieferkette.
+
 
 ## AKS Deployment mit Helm
 
@@ -190,4 +267,6 @@ Die Anwendung kann mit dem Helm Chart im Verzeichnis `helm-chart/secret-sharer-a
 
 6.  **Zugriff:** Ermittle die externe IP des Frontend LoadBalancer Services.
 
+## Screenshots
+Hier findest du die benötigten Assets: [Screenshots](./assets/)
 ---
