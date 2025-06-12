@@ -48,18 +48,12 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({
           showFeedback(successMessage);
           if (textToCopy === generatedPassword) setPasswordCopied(true);
         })
-        .catch(() => {
+        .catch((err: unknown) => {
           setError('Fehler beim Kopieren. Bitte manuell kopieren.');
+          console.error('Kopierfehler:', err);
         });
     } else {
-      // Fallback für Browser, die die Clipboard API nicht unterstützen
-      const tempTextArea = document.createElement('textarea');
-      tempTextArea.value = textToCopy;
-      document.body.appendChild(tempTextArea);
-      tempTextArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(tempTextArea);
-      showFeedback(successMessage);
+      setError('Clipboard API wird nicht unterstützt. Bitte manuell kopieren.');
     }
   };
   const generatePassword = () => {
