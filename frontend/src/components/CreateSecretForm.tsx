@@ -229,7 +229,7 @@ const CreateSecretForm: React.FC<CreateSecretFormProps> = ({
             onClick={generatePassword}
             className="text-xs bg-teal-600 hover:bg-teal-700 text-white py-1.5 px-3 rounded whitespace-nowrap"
           >
-            Generieren & Kopieren
+            Passwort generieren & Kopieren
           </button>
         </div>
         {generatedPassword && (
